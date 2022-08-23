@@ -1,11 +1,12 @@
-import Phaser, { Scene } from 'phaser';
+import Phaser from 'phaser';
+import { Generator } from '../classes/generator';
+import { Killer } from '../classes/killer';
+import { Survivor } from '../classes/survivor';
 import { circleAndRectangleOverlap } from '../functions/geometry/circleAndRectangleOverlap';
 import { circlesOverlap } from '../functions/geometry/circlesOverlap';
-import { distanceBetween2Points } from '../functions/geometry/distanceBetween2Points';
-import { getUnitVectorFromPoint1To2 } from '../functions/geometry/getUnitVectorFromPoint1To2';
 import { randomIntFromInterval } from '../functions/math/randomIntFromInterval';
 
-const SIMULATOR_CONSTANTS = {
+export const SIMULATOR_CONSTANTS = {
   STATUS_BAR: {
     dimensions: {
       x: 100,
@@ -21,7 +22,7 @@ const SIMULATOR_CONSTANTS = {
   SPEED_MULTIPLIER: 1, // 10,
 };
 
-const DBD_CONSTANTS = {
+export const DBD_CONSTANTS = {
   GENERATOR: {
     dimensions: {
       x: 25,
@@ -51,185 +52,14 @@ const DBD_CONSTANTS = {
   MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS: 12.5,
 }
 
-class Generator extends Phaser.Class {
-  positionX: number;
-  positionY: number;
-  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  body: any;
-
-  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
-    super({});
-    this.positionX = x;
-    this.positionY = y;
-    this.phaserInstance = phaserInstance;
-    this.body = scene.add.group();
-  }
-}
-
-class Killer extends Phaser.Class {
-  positionX: number;
-  positionY: number;
-  speedX: number;
-  speedY: number;
-  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  intention: KillerIntention;
-  objectiveFocused: Coordinates | null;
-
-  body: any;
-
-  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
-    super({});
-    this.positionX = x;
-    this.positionY = y;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.phaserInstance = phaserInstance;
-    this.intention = KillerIntention.IDLE;
-    this.objectiveFocused = null;
-    this.body = scene.add.group();
-  }
-
-  focusNearestSurvivor = (survivors: Survivor[]) => {
-    let shortestDistance = null;
-    let objectiveCoordinates: Coordinates | null = null;
-    for (const survivor of survivors) {
-      const distance = distanceBetween2Points(
-        this.positionX, this.positionY,
-        survivor.positionX, survivor.positionY,
-      );
-
-      if (shortestDistance === null || distance < shortestDistance) {
-        shortestDistance = distance;
-        objectiveCoordinates = {
-          x: survivor.positionX,
-          y: survivor.positionY,
-        };
-      }
-    }
-    this.objectiveFocused = objectiveCoordinates;
-  };
-
-  runTowardsObjective = (): { xComponent: number, yComponent: number } => {
-    const { xComponent, yComponent } = this.objectiveFocused ?
-      getUnitVectorFromPoint1To2(this.positionX, this.positionY, this.objectiveFocused?.x, this.objectiveFocused?.y): { xComponent: 0, yComponent: 0 };
-    const { KILLER } = DBD_CONSTANTS;
-    const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
-
-    const finalSpeedX = xComponent * KILLER.speed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-    const finalSpeedY = yComponent * KILLER.speed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-
-    this.speedX = finalSpeedX;
-    this.speedY = finalSpeedY;
-    return { xComponent: finalSpeedX, yComponent: finalSpeedY };
-  }
-
-}
-
-enum SurvivorIntention {
+export enum SurvivorIntention {
   IDLE = 'IDLE',
   REPAIR = 'REPAIR',
 }
 
-enum KillerIntention {
+export enum KillerIntention {
   IDLE = 'IDLE',
   CHASE = 'CHASE',
-}
-
-class Survivor extends Phaser.Class {
-  positionX: number;
-  positionY: number;
-  speedX: number;
-  speedY: number;
-  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-  intention: SurvivorIntention;
-  objectiveFocused: Coordinates | null;
-
-  healthStates: number;
-  isAdvancingTowardsObjective: boolean;
-  isInHurtAnimation: boolean;
-  hurtAnimationEndsAt: number | null;
-
-  body: any;
-
-  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
-    super({});
-    this.positionX = x;
-    this.positionY = y;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.phaserInstance = phaserInstance;
-    this.intention = SurvivorIntention.IDLE;
-    this.objectiveFocused = null;
-
-
-    this.healthStates = 2;
-    
-    this.isInHurtAnimation = false;
-    this.hurtAnimationEndsAt = null;
-    
-
-    
-    this.isAdvancingTowardsObjective = false;
-    this.body = scene.add.group();
-  }
-
-  loseHealthState = () => {
-    this.healthStates -= 1;
-  };
-
-  beginHurtAnimation = (time: number) => {
-    this.isInHurtAnimation = true;
-    this.hurtAnimationEndsAt = time;
-  };
-
-  stopHurtAnimation = () => {
-    this.isInHurtAnimation = false;
-    this.hurtAnimationEndsAt = null;
-  }
-
-  collideWithKiller = (killer: Killer) => {
-    if (
-      distanceBetween2Points(
-        this.positionX, this.positionY,
-        killer.positionX, killer.positionY
-      ) <= DBD_CONSTANTS.SURVIVOR.radius + DBD_CONSTANTS.KILLER.radius
-    ) return true;
-    else return false;
-  };
-
-  focusNearestGenerator = (generators: Generator[]) => {
-    let shortestDistance = null;
-    let objectiveCoordinates: Coordinates | null = null;
-    for (const generator of generators) {
-      const distance = distanceBetween2Points(
-        this.positionX, this.positionY,
-        generator.positionX, generator.positionY,
-      );
-
-      if (shortestDistance === null || distance < shortestDistance) {
-        shortestDistance = distance;
-        objectiveCoordinates = {
-          x: generator.positionX,
-          y: generator.positionY,
-        };
-      }
-    }
-    this.objectiveFocused = objectiveCoordinates;
-  };
-
-  runTowardsObjective = (): { xComponent: number, yComponent: number } => {
-    const { xComponent, yComponent } = this.objectiveFocused ?
-      getUnitVectorFromPoint1To2(this.positionX, this.positionY, this.objectiveFocused?.x, this.objectiveFocused?.y): { xComponent: 0, yComponent: 0 };
-    const { SURVIVOR } = DBD_CONSTANTS;
-    const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
-
-    const finalSpeedX = xComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-    const finalSpeedY = yComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-
-    this.speedX = finalSpeedX;
-    this.speedY = finalSpeedY;
-    return { xComponent: finalSpeedX, yComponent: finalSpeedY };
-  }
 }
 
 const generators: Generator[] = [];
@@ -515,7 +345,7 @@ function calculateKillerCoordinates(): Coordinates {
   };
 }
 
-interface Coordinates {
+export interface Coordinates {
   x: number,
   y: number,
 }
