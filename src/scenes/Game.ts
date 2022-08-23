@@ -69,17 +69,19 @@ class Killer extends Phaser.Class {
   positionY: number;
   speedX: number;
   speedY: number;
+  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   intention: KillerIntention;
   objectiveFocused: Coordinates | null;
 
   body: any;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
     super({});
     this.positionX = x;
     this.positionY = y;
     this.speedX = 0;
     this.speedY = 0;
+    this.phaserInstance = phaserInstance;
     this.intention = KillerIntention.IDLE;
     this.objectiveFocused = null;
     this.body = scene.add.group();
@@ -243,7 +245,6 @@ const survivors: SurvivorInterface[] = [];
 
 interface KillerInterface {
   initialPosition: Coordinates;
-  instance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   entity: Killer;
 }
 const killers: KillerInterface[] = [];
@@ -423,8 +424,7 @@ export default class Demo extends Phaser.Scene {
 
     killers.push({
       initialPosition,
-      instance: killerInstance,
-      entity: new Killer(this, initialPosition.x, initialPosition.y),
+      entity: new Killer(this, initialPosition.x, initialPosition.y, killerInstance),
     });
 
     for (const { entity } of survivors) {
@@ -451,9 +451,9 @@ export default class Demo extends Phaser.Scene {
       entity.positionX = entity.phaserInstance.x;
       entity.positionY = entity.phaserInstance.y;
     }
-    for (const { entity, instance } of killers) {
-      entity.positionX = instance.x;
-      entity.positionY = instance.y;
+    for (const { entity } of killers) {
+      entity.positionX = entity.phaserInstance.x;
+      entity.positionY = entity.phaserInstance.y;
     }
 
     for (const { entity: survivor } of survivors) {
@@ -486,17 +486,17 @@ export default class Demo extends Phaser.Scene {
       }
     }
 
-    for (const { entity: killer, instance } of killers) {
+    for (const { entity: killer } of killers) {
       if (time > 3000) {
         if (killer.intention === KillerIntention.IDLE) {
           killer.intention = KillerIntention.CHASE;
           killer.focusNearestSurvivor(survivors.map(surv => surv.entity));
           const { xComponent, yComponent } = killer.runTowardsObjective();
-          instance.setVelocity(xComponent, yComponent);
+          killer.phaserInstance.setVelocity(xComponent, yComponent);
         } else if (killer.intention === KillerIntention.CHASE) {
           killer.focusNearestSurvivor(survivors.map(surv => surv.entity));
           const { xComponent, yComponent } = killer.runTowardsObjective();
-          instance.setVelocity(xComponent, yComponent);
+          killer.phaserInstance.setVelocity(xComponent, yComponent);
         }
       }
     }
