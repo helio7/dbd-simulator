@@ -232,23 +232,9 @@ class Survivor extends Phaser.Class {
   }
 }
 
-interface GeneratorInterface {
-  initialPosition: Coordinates;
-  entity: Generator;
-}
-const generators: GeneratorInterface[] = [];
-
-interface SurvivorInterface {
-  initialPosition: Coordinates;
-  entity: Survivor;
-}
-const survivors: SurvivorInterface[] = [];
-
-interface KillerInterface {
-  initialPosition: Coordinates;
-  entity: Killer;
-}
-const killers: KillerInterface[] = [];
+const generators: Generator[] = [];
+const survivors: Survivor[] = [];
+const killers: Killer[] = [];
 
 export default class Demo extends Phaser.Scene {
   constructor() {
@@ -339,9 +325,8 @@ export default class Demo extends Phaser.Scene {
         ),
       );
 
-      generators.push({
-        initialPosition: coordinates,
-        entity: new Generator(
+      generators.push(
+        new Generator(
           this,
           coordinates.x, coordinates.y,
           myGenerators.create(
@@ -350,7 +335,7 @@ export default class Demo extends Phaser.Scene {
             'generator',
           ),
         ),
-      });
+      );
     }
 
     for (let i = 0; i < 4; i++) {
@@ -408,10 +393,9 @@ export default class Demo extends Phaser.Scene {
       survivorInstance.setCollideWorldBounds(true);
       survivorInstance.body.setBoundsRectangle(map);
 
-      survivors.push({
-        initialPosition: coordinates,
-        entity: new Survivor(this, coordinates.x, coordinates.y, survivorInstance),
-      });
+      survivors.push(
+        new Survivor(this, coordinates.x, coordinates.y, survivorInstance),
+      );
     }
 
     const initialPosition = calculateKillerCoordinates();
@@ -426,22 +410,21 @@ export default class Demo extends Phaser.Scene {
     killerInstance.setCollideWorldBounds(true);
     killerInstance.body.setBoundsRectangle(map);
 
-    killers.push({
-      initialPosition,
-      entity: new Killer(this, initialPosition.x, initialPosition.y, killerInstance),
-    });
+    killers.push(
+      new Killer(this, initialPosition.x, initialPosition.y, killerInstance),
+    );
 
-    for (const { entity } of survivors) {
-      this.physics.add.collider(entity.phaserInstance, myGenerators);
-      this.physics.add.collider(entity.phaserInstance, killerInstance);
+    for (const survivor of survivors) {
+      this.physics.add.collider(survivor.phaserInstance, myGenerators);
+      this.physics.add.collider(survivor.phaserInstance, killerInstance);
     }
 
     for (let i = 0; i < survivors.length; i++) {
-      this.physics.add.collider(survivors[i].entity.phaserInstance, myGenerators);
-      this.physics.add.collider(survivors[i].entity.phaserInstance, killerInstance);
+      this.physics.add.collider(survivors[i].phaserInstance, myGenerators);
+      this.physics.add.collider(survivors[i].phaserInstance, killerInstance);
 
       for (let j = i; j < survivors.length; j++) {
-        this.physics.add.collider(survivors[i].entity.phaserInstance, survivors[j].entity.phaserInstance);
+        this.physics.add.collider(survivors[i].phaserInstance, survivors[j].phaserInstance);
       }
     }
 
@@ -451,21 +434,21 @@ export default class Demo extends Phaser.Scene {
   update(time: number, delta: number): void {
 
     // Update positions.
-    for (const { entity } of survivors) {
-      entity.positionX = entity.phaserInstance.x;
-      entity.positionY = entity.phaserInstance.y;
+    for (const survivor of survivors) {
+      survivor.positionX = survivor.phaserInstance.x;
+      survivor.positionY = survivor.phaserInstance.y;
     }
-    for (const { entity } of killers) {
-      entity.positionX = entity.phaserInstance.x;
-      entity.positionY = entity.phaserInstance.y;
+    for (const killer of killers) {
+      killer.positionX = killer.phaserInstance.x;
+      killer.positionY = killer.phaserInstance.y;
     }
 
-    for (const { entity: survivor } of survivors) {
+    for (const survivor of survivors) {
 
       if (time > 3000) {
         if (survivor.intention === SurvivorIntention.IDLE) {
           survivor.intention = SurvivorIntention.REPAIR;
-          survivor.focusNearestGenerator(generators.map(gen => gen.entity));
+          survivor.focusNearestGenerator(generators);
           const { xComponent, yComponent } = survivor.runTowardsObjective();
           survivor.phaserInstance.setVelocity(xComponent, yComponent);
         }
@@ -475,14 +458,14 @@ export default class Demo extends Phaser.Scene {
         }
       }
 
-      if (survivor.collideWithKiller(killers[0].entity) && !survivor.isInHurtAnimation) {
+      if (survivor.collideWithKiller(killers[0]) && !survivor.isInHurtAnimation) {
         survivor.loseHealthState();
         survivor.beginHurtAnimation(time + 1000);
         console.log('COLLISION');
       }
       if (survivor.intention === SurvivorIntention.REPAIR) {
 
-        if (!survivor.objectiveFocused) survivor.focusNearestGenerator(generators.map(gen => gen.entity));
+        if (!survivor.objectiveFocused) survivor.focusNearestGenerator(generators);
 
 
 
@@ -490,15 +473,15 @@ export default class Demo extends Phaser.Scene {
       }
     }
 
-    for (const { entity: killer } of killers) {
+    for (const killer of killers) {
       if (time > 3000) {
         if (killer.intention === KillerIntention.IDLE) {
           killer.intention = KillerIntention.CHASE;
-          killer.focusNearestSurvivor(survivors.map(surv => surv.entity));
+          killer.focusNearestSurvivor(survivors);
           const { xComponent, yComponent } = killer.runTowardsObjective();
           killer.phaserInstance.setVelocity(xComponent, yComponent);
         } else if (killer.intention === KillerIntention.CHASE) {
-          killer.focusNearestSurvivor(survivors.map(surv => surv.entity));
+          killer.focusNearestSurvivor(survivors);
           const { xComponent, yComponent } = killer.runTowardsObjective();
           killer.phaserInstance.setVelocity(xComponent, yComponent);
         }
