@@ -12,7 +12,10 @@ export class Survivor extends Phaser.Class {
    speedY: number;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
    intention: SurvivorIntention;
-   objectiveFocused: Coordinates | null;
+   repairPositionFocused: {
+     repairPositionId: number,
+     generatorId: number
+   } | null;
  
    healthStates: number;
    isAdvancingTowardsObjective: boolean;
@@ -29,8 +32,7 @@ export class Survivor extends Phaser.Class {
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
      this.intention = SurvivorIntention.IDLE;
-     this.objectiveFocused = null;
- 
+     this.repairPositionFocused = null;
  
      this.healthStates = 2;
      
@@ -67,29 +69,46 @@ export class Survivor extends Phaser.Class {
      else return false;
    };
  
-   focusNearestGenerator = (generators: Generator[]) => {
+   focusNearestGenerator = (
+     generators: Generator[] | IterableIterator<Generator>
+   ) => {
      let shortestDistance = null;
-     let objectiveCoordinates: Coordinates | null = null;
+     let repairPositionId = null;
+     let generatorId = null;
      for (const generator of generators) {
-       const distance = distanceBetween2Points(
-         this.positionX, this.positionY,
-         generator.positionX, generator.positionY,
-       );
- 
-       if (shortestDistance === null || distance < shortestDistance) {
-         shortestDistance = distance;
-         objectiveCoordinates = {
-           x: generator.positionX,
-           y: generator.positionY,
-         };
+       for (const { id, generatorId: genId, isOccupied, coordinates } of generator.repairPositions.values()) {
+         if (!isOccupied) {
+          const distance = distanceBetween2Points(
+            this.positionX, this.positionY,
+            coordinates.x, coordinates.y,
+          );
+          if (shortestDistance === null || distance < shortestDistance) {
+           shortestDistance = distance;
+           repairPositionId = id;
+           generatorId = genId;
+          }
+         }
        }
      }
-     this.objectiveFocused = objectiveCoordinates;
+
+     if (repairPositionId && generatorId) {
+      this.repairPositionFocused = {
+        repairPositionId,
+        generatorId,
+      };
+     }
    };
  
-   runTowardsObjective = (): { xComponent: number, yComponent: number } => {
-     const { xComponent, yComponent } = this.objectiveFocused ?
-       getUnitVectorFromPoint1To2(this.positionX, this.positionY, this.objectiveFocused?.x, this.objectiveFocused?.y): { xComponent: 0, yComponent: 0 };
+   runTowardsObjective = (
+     objectiveCoordinates: Coordinates,
+   ): { xComponent: number, yComponent: number } => {
+     const { xComponent, yComponent } = this.repairPositionFocused ?
+       getUnitVectorFromPoint1To2(
+         this.positionX,
+         this.positionY,
+         objectiveCoordinates.x,
+         objectiveCoordinates.y,
+       ): { xComponent: 0, yComponent: 0 };
      const { SURVIVOR } = DBD_CONSTANTS;
      const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
  
