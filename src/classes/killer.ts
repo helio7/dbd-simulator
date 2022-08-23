@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
+import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS } from "../constants/constants";
 import { distanceBetween2Points } from "../functions/geometry/distanceBetween2Points";
 import { getUnitVectorFromPoint1To2 } from "../functions/geometry/getUnitVectorFromPoint1To2";
-import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS } from "../scenes/Game";
 import { Survivor } from "./survivor";
 
 export class Killer extends Phaser.Class {
