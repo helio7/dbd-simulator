@@ -136,6 +136,7 @@ class Survivor extends Phaser.Class {
   positionY: number;
   speedX: number;
   speedY: number;
+  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   intention: SurvivorIntention;
   objectiveFocused: Coordinates | null;
 
@@ -146,12 +147,13 @@ class Survivor extends Phaser.Class {
 
   body: any;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
     super({});
     this.positionX = x;
     this.positionY = y;
     this.speedX = 0;
     this.speedY = 0;
+    this.phaserInstance = phaserInstance;
     this.intention = SurvivorIntention.IDLE;
     this.objectiveFocused = null;
 
@@ -235,7 +237,6 @@ const generators: GeneratorInterface[] = [];
 
 interface SurvivorInterface {
   initialPosition: Coordinates;
-  instance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   entity: Survivor;
 }
 const survivors: SurvivorInterface[] = [];
@@ -404,8 +405,7 @@ export default class Demo extends Phaser.Scene {
 
       survivors.push({
         initialPosition: coordinates,
-        instance: survivorInstance,
-        entity: new Survivor(this, coordinates.x, coordinates.y),
+        entity: new Survivor(this, coordinates.x, coordinates.y, survivorInstance),
       });
     }
 
@@ -427,17 +427,17 @@ export default class Demo extends Phaser.Scene {
       entity: new Killer(this, initialPosition.x, initialPosition.y),
     });
 
-    for (const { instance } of survivors) {
-      this.physics.add.collider(instance, myGenerators);
-      this.physics.add.collider(instance, killerInstance);
+    for (const { entity } of survivors) {
+      this.physics.add.collider(entity.phaserInstance, myGenerators);
+      this.physics.add.collider(entity.phaserInstance, killerInstance);
     }
 
     for (let i = 0; i < survivors.length; i++) {
-      this.physics.add.collider(survivors[i].instance, myGenerators);
-      this.physics.add.collider(survivors[i].instance, killerInstance);
+      this.physics.add.collider(survivors[i].entity.phaserInstance, myGenerators);
+      this.physics.add.collider(survivors[i].entity.phaserInstance, killerInstance);
 
       for (let j = i; j < survivors.length; j++) {
-        this.physics.add.collider(survivors[i].instance, survivors[j].instance);
+        this.physics.add.collider(survivors[i].entity.phaserInstance, survivors[j].entity.phaserInstance);
       }
     }
 
@@ -447,23 +447,23 @@ export default class Demo extends Phaser.Scene {
   update(time: number, delta: number): void {
 
     // Update positions.
-    for (const { entity, instance } of survivors) {
-      entity.positionX = instance.x;
-      entity.positionY = instance.y;
+    for (const { entity } of survivors) {
+      entity.positionX = entity.phaserInstance.x;
+      entity.positionY = entity.phaserInstance.y;
     }
     for (const { entity, instance } of killers) {
       entity.positionX = instance.x;
       entity.positionY = instance.y;
     }
 
-    for (const { entity: survivor, instance } of survivors) {
+    for (const { entity: survivor } of survivors) {
 
       if (time > 3000) {
         if (survivor.intention === SurvivorIntention.IDLE) {
           survivor.intention = SurvivorIntention.REPAIR;
           survivor.focusNearestGenerator(generators.map(gen => gen.entity));
           const { xComponent, yComponent } = survivor.runTowardsObjective();
-          instance.setVelocity(xComponent, yComponent);
+          survivor.phaserInstance.setVelocity(xComponent, yComponent);
         }
 
         if (survivor.isInHurtAnimation && survivor.hurtAnimationEndsAt && time >= survivor.hurtAnimationEndsAt) {
