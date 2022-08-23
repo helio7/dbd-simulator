@@ -54,12 +54,14 @@ const DBD_CONSTANTS = {
 class Generator extends Phaser.Class {
   positionX: number;
   positionY: number;
+  phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   body: any;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
     super({});
     this.positionX = x;
     this.positionY = y;
+    this.phaserInstance = phaserInstance;
     this.body = scene.add.group();
   }
 }
@@ -232,7 +234,6 @@ class Survivor extends Phaser.Class {
 
 interface GeneratorInterface {
   initialPosition: Coordinates;
-  instance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   entity: Generator;
 }
 const generators: GeneratorInterface[] = [];
@@ -340,12 +341,15 @@ export default class Demo extends Phaser.Scene {
 
       generators.push({
         initialPosition: coordinates,
-        instance: myGenerators.create(
-          coordinates.x,
-          coordinates.y,
-          'generator',
+        entity: new Generator(
+          this,
+          coordinates.x, coordinates.y,
+          myGenerators.create(
+            coordinates.x,
+            coordinates.y,
+            'generator',
+          ),
         ),
-        entity: new Generator(this, coordinates.x, coordinates.y),
       });
     }
 
