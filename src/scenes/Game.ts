@@ -336,6 +336,11 @@ export default class Demo extends Phaser.Scene {
           if (down) yVelocity += killerVelocity;
           if (left) xVelocity -= killerVelocity;
           if (right) xVelocity += killerVelocity;
+
+          if (xVelocity && yVelocity) {
+            xVelocity = 0.5 * Math.sqrt(2) * xVelocity;
+            yVelocity = 0.5 * Math.sqrt(2) * yVelocity;
+          }
   
           killer.phaserInstance.setVelocity(xVelocity, yVelocity);
         }
