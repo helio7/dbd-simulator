@@ -6,11 +6,14 @@ import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, Survi
 import { circleAndRectangleOverlap } from '../functions/geometry/circleAndRectangleOverlap';
 import { circlesOverlap } from '../functions/geometry/circlesOverlap';
 import { distanceBetween2Points } from '../functions/geometry/distanceBetween2Points';
+import { simulateKillerBehavior } from '../functions/ia';
 import { randomIntFromInterval } from '../functions/math/randomIntFromInterval';
 
 const generators: Map<number, Generator> = new Map();
 const survivors: Survivor[] = [];
 const killers: Killer[] = [];
+let wasdKeys: any;
+let crosshair: any;
 
 export default class Demo extends Phaser.Scene {
   constructor() {
@@ -19,9 +22,11 @@ export default class Demo extends Phaser.Scene {
 
   preload() {
     const { GENERATOR, SURVIVOR, KILLER } = DBD_CONSTANTS;
+    const { CROSSHAIR } = SIMULATOR_CONSTANTS;
     this.load.image(GENERATOR.image.name, GENERATOR.image.path);
     this.load.image(SURVIVOR.image.name, SURVIVOR.image.path);
     this.load.image(KILLER.image.name, KILLER.image.path);
+    this.load.image(CROSSHAIR.image.name, CROSSHAIR.image.path);
   }
 
   create() {
@@ -33,6 +38,7 @@ export default class Demo extends Phaser.Scene {
       PLAYABLE_MAP,
       PIXELS_PER_DBD_METER,
       SPEED_MULTIPLIER,
+      CROSSHAIR
     } = SIMULATOR_CONSTANTS;
 
     const { KILLER, SURVIVOR, GENERATOR } = DBD_CONSTANTS;
@@ -207,6 +213,34 @@ export default class Demo extends Phaser.Scene {
     }
 
     this.physics.add.collider(killerInstance, myGenerators);
+
+    crosshair = this.add.sprite(400, 300, 'crosshair');
+
+    wasdKeys = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+    });
+
+    this.input.on('pointerdown', (pointer: any) => {
+      this.input.mouse.requestPointerLock();
+    }, this);
+
+    this.input.on('pointermove', (pointer: any) => {
+      if (this.input.mouse.locked) {
+        crosshair.x += pointer.movementX;
+        crosshair.y += pointer.movementY;
+        const crosshairMinimumX = STATUS_BAR.dimensions.x + 0.5 * CROSSHAIR.radius;
+        const crosshairMaximumX = STATUS_BAR.dimensions.x + PLAYABLE_MAP.dimensions.x - 0.5 * CROSSHAIR.radius;
+        if (crosshair.x <= crosshairMinimumX) crosshair.x = crosshairMinimumX;
+        else if (crosshair.x >= crosshairMaximumX) crosshair.x = crosshairMaximumX;
+        const crosshairMinimumY = 0.5 * CROSSHAIR.radius;
+        const crosshairMaximumY = PLAYABLE_MAP.dimensions.y - 0.5 * CROSSHAIR.radius;
+        if (crosshair.y <= crosshairMinimumY) crosshair.y = crosshairMinimumY;
+        else if (crosshair.y >= crosshairMaximumY) crosshair.y = crosshairMaximumY;
+      }
+    }, this);
   }
 
   update(time: number, delta: number): void {
@@ -286,15 +320,24 @@ export default class Demo extends Phaser.Scene {
 
     for (const killer of killers) {
       if (time > 3000) {
-        if (killer.intention === KillerIntention.IDLE) {
-          killer.intention = KillerIntention.CHASE;
-          killer.focusNearestSurvivor(survivors);
-          const { xComponent, yComponent } = killer.runTowardsObjective();
-          killer.phaserInstance.setVelocity(xComponent, yComponent);
-        } else if (killer.intention === KillerIntention.CHASE) {
-          killer.focusNearestSurvivor(survivors);
-          const { xComponent, yComponent } = killer.runTowardsObjective();
-          killer.phaserInstance.setVelocity(xComponent, yComponent);
+        if (SIMULATOR_CONSTANTS.ACTIVE_IA.killer) simulateKillerBehavior(killer, survivors);
+        else {
+          let xVelocity: number = 0;
+          let yVelocity: number = 0;
+  
+          let up = wasdKeys.up.isDown;
+          let right = wasdKeys.right.isDown;
+          let down = wasdKeys.down.isDown;
+          let left = wasdKeys.left.isDown;
+  
+          const killerVelocity = DBD_CONSTANTS.KILLER.speed * SIMULATOR_CONSTANTS.PIXELS_PER_DBD_METER;
+  
+          if (up) yVelocity -= killerVelocity;
+          if (down) yVelocity += killerVelocity;
+          if (left) xVelocity -= killerVelocity;
+          if (right) xVelocity += killerVelocity;
+  
+          killer.phaserInstance.setVelocity(xVelocity, yVelocity);
         }
       }
     }
