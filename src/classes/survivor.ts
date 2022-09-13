@@ -11,6 +11,8 @@ export class Survivor extends Phaser.Class {
    speedX: number;
    speedY: number;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+   controlledByIa: boolean;
+   dummyMovement: boolean;
    intention: SurvivorIntention;
    repairPositionFocused: {
      repairPositionId: number,
@@ -24,13 +26,15 @@ export class Survivor extends Phaser.Class {
  
    body: any;
  
-   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
+   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean, dummyMovement: boolean) {
      super({});
      this.positionX = x;
      this.positionY = y;
      this.speedX = 0;
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
+     this.controlledByIa = controlledByIa;
+     this.dummyMovement = dummyMovement;
      this.intention = SurvivorIntention.IDLE;
      this.repairPositionFocused = null;
  

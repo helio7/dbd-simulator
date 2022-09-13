@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
-import { Generator, RepairPosition } from '../classes/generator';
+import { Generator } from '../classes/generator';
 import { Killer } from '../classes/killer';
 import { Survivor } from '../classes/survivor';
-import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorIntention } from '../constants/constants';
+import { Coordinates, DBD_CONSTANTS, SIMULATOR_CONSTANTS, SurvivorIntention } from '../constants/constants';
 import { circleAndRectangleOverlap } from '../functions/geometry/circleAndRectangleOverlap';
 import { circlesOverlap } from '../functions/geometry/circlesOverlap';
-import { distanceBetween2Points } from '../functions/geometry/distanceBetween2Points';
-import { simulateKillerBehavior } from '../functions/ia';
+import { simulateDummyMovement, simulateKillerBehavior, simulateSurvivorBehavior } from '../functions/ia';
 import { randomIntFromInterval } from '../functions/math/randomIntFromInterval';
 
 const generators: Map<number, Generator> = new Map();
@@ -178,7 +177,7 @@ export default class Demo extends Phaser.Scene {
       survivorInstance.body.setBoundsRectangle(map);
 
       survivors.push(
-        new Survivor(this, coordinates.x, coordinates.y, survivorInstance),
+        new Survivor(this, coordinates.x, coordinates.y, survivorInstance, true, false),
       );
     }
 
@@ -195,7 +194,7 @@ export default class Demo extends Phaser.Scene {
     killerInstance.body.setBoundsRectangle(map);
 
     killers.push(
-      new Killer(this, initialPosition.x, initialPosition.y, killerInstance),
+      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, false),
     );
 
     for (const survivor of survivors) {
@@ -257,70 +256,24 @@ export default class Demo extends Phaser.Scene {
 
     for (const survivor of survivors) {
       if (time > 3000) {
-        let generator: Generator | null = null;
-        let repairPosition: RepairPosition | null = null;
-        if (survivor.repairPositionFocused) {
-          const generatorValue = generators.get(survivor.repairPositionFocused.generatorId);
-          generator = generatorValue ? generatorValue : null;
-          if (generator) {
-            repairPosition = generator.getRepairPositionById(
-              survivor.repairPositionFocused.repairPositionId,
-            );
-          }
-        }
-
-        if (survivor.intention === SurvivorIntention.IDLE) {
-          survivor.intention = SurvivorIntention.REPAIR;
-          survivor.focusNearestGenerator(generators.values());
-        }
-
-        if (survivor.intention === SurvivorIntention.REPAIR) {
-          if (repairPosition) {
-            const { xComponent, yComponent } = survivor.runTowardsObjective(
-              repairPosition?.coordinates,
-            );
-            survivor.phaserInstance.setVelocity(xComponent, yComponent);
-          }
-          if (
-            generator &&
-            repairPosition &&
-            distanceBetween2Points(
-              survivor.positionX,
-              survivor.positionY,
-              repairPosition.coordinates.x,
-              repairPosition.coordinates.y,
-            ) <= DBD_CONSTANTS.SURVIVOR.radius &&
-            !repairPosition.isOccupied
-          ) {
-            survivor.positionX = repairPosition.coordinates.x;
-            survivor.positionY = repairPosition.coordinates.y;
-            survivor.phaserInstance.setPosition(
-              repairPosition.coordinates.x, repairPosition.coordinates.y,
-            );
-            survivor.speedX = 0;
-            survivor.speedY = 0;
-            survivor.phaserInstance.setVelocity(0, 0);
-          }
-        }
-
-        if (survivor.isInHurtAnimation && survivor.hurtAnimationEndsAt && time >= survivor.hurtAnimationEndsAt) {
-          survivor.stopHurtAnimation();
-        }
+        if (survivor.dummyMovement) {
+          simulateDummyMovement(survivor);
+          continue;
+        } else if (survivor.controlledByIa) simulateSurvivorBehavior(generators, survivor, time);
       }
-
       if (survivor.collideWithKiller(killers[0]) && !survivor.isInHurtAnimation) {
         survivor.loseHealthState();
         survivor.beginHurtAnimation(time + 1000);
         console.log('COLLISION');
       }
-      if (survivor.intention === SurvivorIntention.REPAIR) {
+      if (survivor.controlledByIa && survivor.intention === SurvivorIntention.REPAIR) {
         if (!survivor.repairPositionFocused) survivor.focusNearestGenerator(generators.values());
       }
     }
 
     for (const killer of killers) {
       if (time > 3000) {
-        if (SIMULATOR_CONSTANTS.ACTIVE_IA.killer) simulateKillerBehavior(killer, survivors);
+        if (killer.controlledByIa) simulateKillerBehavior(killer, survivors);
         else {
           let xVelocity: number = 0;
           let yVelocity: number = 0;

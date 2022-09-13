@@ -12,16 +12,18 @@ export class Killer extends Phaser.Class {
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
    intention: KillerIntention;
    objectiveFocused: Coordinates | null;
+   controlledByIa: boolean;
  
    body: any;
  
-   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody) {
+   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean) {
      super({});
      this.positionX = x;
      this.positionY = y;
      this.speedX = 0;
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
+     this.controlledByIa = controlledByIa;
      this.intention = KillerIntention.IDLE;
      this.objectiveFocused = null;
      this.body = scene.add.group();
