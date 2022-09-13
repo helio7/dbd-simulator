@@ -50,6 +50,7 @@ export const DBD_CONSTANTS = {
       name: 'purple_ball',
       path: 'assets/purple_ball-19x19.png',
     },
+    defaultTerrorRadius: 32,
   },
   MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS: 12.5,
 };

@@ -13,10 +13,12 @@ export class Killer extends Phaser.Class {
    intention: KillerIntention;
    objectiveFocused: Coordinates | null;
    controlledByIa: boolean;
+   terrorRadius: number;
+   terrorRadiusIndicatorInstance: Phaser.GameObjects.Graphics;
  
    body: any;
  
-   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean) {
+   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean, terrorRadius: number, terrorRadiusIndicatorInstance: Phaser.GameObjects.Graphics) {
      super({});
      this.positionX = x;
      this.positionY = y;
@@ -24,6 +26,8 @@ export class Killer extends Phaser.Class {
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
      this.controlledByIa = controlledByIa;
+     this.terrorRadius = terrorRadius;
+     this.terrorRadiusIndicatorInstance = terrorRadiusIndicatorInstance;
      this.intention = KillerIntention.IDLE;
      this.objectiveFocused = null;
      this.body = scene.add.group();

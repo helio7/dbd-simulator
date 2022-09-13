@@ -193,8 +193,13 @@ export default class Demo extends Phaser.Scene {
     killerInstance.setCollideWorldBounds(true);
     killerInstance.body.setBoundsRectangle(map);
 
+    const terrorRadiusIndicatorInstance = this.add.graphics()
+      .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER);
+
+    terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
+
     killers.push(
-      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, false),
+      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, false, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
     );
 
     for (const survivor of survivors) {
@@ -297,6 +302,7 @@ export default class Demo extends Phaser.Scene {
   
           killer.phaserInstance.setVelocity(xVelocity, yVelocity);
         }
+        killer.terrorRadiusIndicatorInstance.setPosition(killer.positionX, killer.positionY);
       }
     }
   }
