@@ -30,38 +30,41 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     }
   }
 
-  if (survivor.intention === SurvivorIntention.IDLE) {
-    survivor.intention = SurvivorIntention.REPAIR;
-    survivor.focusNearestGenerator(generators.values());
-  }
-
-  if (survivor.intention === SurvivorIntention.REPAIR) {
-    if (repairPosition) {
-      const { xComponent, yComponent } = survivor.runTowardsObjective(
-        repairPosition?.coordinates,
-      );
-      survivor.phaserInstance.setVelocity(xComponent, yComponent);
-    }
-    if (
-      generator &&
-      repairPosition &&
-      distanceBetween2Points(
-        survivor.positionX,
-        survivor.positionY,
-        repairPosition.coordinates.x,
-        repairPosition.coordinates.y,
-      ) <= DBD_CONSTANTS.SURVIVOR.radius &&
-      !repairPosition.isOccupied
-    ) {
-      survivor.positionX = repairPosition.coordinates.x;
-      survivor.positionY = repairPosition.coordinates.y;
-      survivor.phaserInstance.setPosition(
-        repairPosition.coordinates.x, repairPosition.coordinates.y,
-      );
-      survivor.speedX = 0;
-      survivor.speedY = 0;
-      survivor.phaserInstance.setVelocity(0, 0);
-    }
+  switch (survivor.intention) {
+    case SurvivorIntention.IDLE:
+      survivor.intention = SurvivorIntention.REPAIR;
+      survivor.focusNearestGenerator(generators.values());
+      break;
+    case SurvivorIntention.REPAIR:
+      if (repairPosition) {
+        const { xComponent, yComponent } = survivor.runTowardsObjective(
+          repairPosition?.coordinates,
+        );
+        survivor.phaserInstance.setVelocity(xComponent, yComponent);
+      }
+      if (
+        generator &&
+        repairPosition &&
+        distanceBetween2Points(
+          survivor.positionX,
+          survivor.positionY,
+          repairPosition.coordinates.x,
+          repairPosition.coordinates.y,
+        ) <= DBD_CONSTANTS.SURVIVOR.radius &&
+        !repairPosition.isOccupied
+      ) {
+        survivor.positionX = repairPosition.coordinates.x;
+        survivor.positionY = repairPosition.coordinates.y;
+        survivor.phaserInstance.setPosition(
+          repairPosition.coordinates.x, repairPosition.coordinates.y,
+        );
+        survivor.speedX = 0;
+        survivor.speedY = 0;
+        survivor.phaserInstance.setVelocity(0, 0);
+      }
+      break;
+    default:
+      break;
   }
 
   if (survivor.isInHurtAnimation && survivor.hurtAnimationEndsAt && time >= survivor.hurtAnimationEndsAt) {
