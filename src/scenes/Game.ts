@@ -264,7 +264,7 @@ export default class Demo extends Phaser.Scene {
         if (survivor.dummyMovement) {
           simulateDummyMovement(survivor);
           continue;
-        } else if (survivor.controlledByIa) simulateSurvivorBehavior(generators, survivor, time);
+        } else if (survivor.controlledByIa) simulateSurvivorBehavior(generators, survivor, time, killers);
       }
       if (survivor.collideWithKiller(killers[0]) && !survivor.isInHurtAnimation) {
         survivor.loseHealthState();

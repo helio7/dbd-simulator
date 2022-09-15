@@ -1,7 +1,7 @@
 import { Generator, RepairPosition } from "../../classes/generator";
 import { Killer } from "../../classes/killer";
 import { Survivor } from "../../classes/survivor";
-import { DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorIntention } from "../../constants/constants";
+import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorIntention } from "../../constants/constants";
 import { distanceBetween2Points } from "../geometry/distanceBetween2Points";
 
 export function simulateKillerBehavior(killer: Killer, survivors: Survivor[]) {
@@ -17,7 +17,7 @@ export function simulateKillerBehavior(killer: Killer, survivors: Survivor[]) {
    }
 }
 
-export function simulateSurvivorBehavior(generators: Map<number, Generator>, survivor: Survivor, time: number) {
+export function simulateSurvivorBehavior(generators: Map<number, Generator>, survivor: Survivor, time: number, killers: Killer[]) {
   let generator: Generator | null = null;
   let repairPosition: RepairPosition | null = null;
   if (survivor.repairPositionFocused) {
@@ -30,11 +30,26 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     }
   }
 
+  let shortestDistance = null;
+  let positionToRunFrom: Coordinates | null = null;
+  for (const killer of killers) {
+    const distance = distanceBetween2Points(
+      survivor.positionX, survivor.positionY,
+      killer.positionX, killer.positionY,
+    );
+    if (shortestDistance === null || distance < shortestDistance) {
+      shortestDistance = distance;
+      positionToRunFrom = { x: killer.positionX, y: killer.positionY };
+    }
+  }
+  if (shortestDistance! < DBD_CONSTANTS.KILLER.defaultTerrorRadius * SIMULATOR_CONSTANTS.PIXELS_PER_DBD_METER) {
+    survivor.intention = SurvivorIntention.ESCAPE;
+  } else {
+    survivor.intention = SurvivorIntention.REPAIR;
+    survivor.focusNearestGenerator(generators.values());
+  }
+
   switch (survivor.intention) {
-    case SurvivorIntention.IDLE:
-      survivor.intention = SurvivorIntention.REPAIR;
-      survivor.focusNearestGenerator(generators.values());
-      break;
     case SurvivorIntention.REPAIR:
       if (repairPosition) {
         const { xComponent, yComponent } = survivor.runTowardsObjective(
@@ -62,6 +77,9 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
         survivor.speedY = 0;
         survivor.phaserInstance.setVelocity(0, 0);
       }
+      break;
+    case SurvivorIntention.ESCAPE:
+      survivor.runAwayFromNearestKiller(killers);
       break;
     default:
       break;

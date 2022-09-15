@@ -123,4 +123,41 @@ export class Survivor extends Phaser.Class {
      this.speedY = finalSpeedY;
      return { xComponent: finalSpeedX, yComponent: finalSpeedY };
    }
+
+   runAwayFromNearestKiller = (
+     killers: Killer[],
+   ): { xComponent: number, yComponent: number } => {
+     let shortestDistance = null;
+    let positionToRunFrom: Coordinates | null = null;
+    for (const killer of killers) {
+      const distance = distanceBetween2Points(
+        this.positionX, this.positionY,
+        killer.positionX, killer.positionY,
+      );
+      if (shortestDistance === null || distance < shortestDistance) {
+        shortestDistance = distance;
+        positionToRunFrom = { x: killer.positionX, y: killer.positionY };
+      }
+    }
+
+    const { xComponent, yComponent } = getUnitVectorFromPoint1To2(
+      this.positionX,
+      this.positionY,
+      positionToRunFrom!.x,
+      positionToRunFrom!.y,
+    );
+
+    const { SURVIVOR } = DBD_CONSTANTS;
+     const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
+
+    const finalSpeedX = -1 * xComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
+    const finalSpeedY = -1 * yComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
+
+    this.speedX = finalSpeedX;
+    this.speedY = finalSpeedY;
+
+    this.phaserInstance.setVelocity(finalSpeedX, finalSpeedY);
+
+    return { xComponent: positionToRunFrom!.x, yComponent: positionToRunFrom!.y };
+   }
 }

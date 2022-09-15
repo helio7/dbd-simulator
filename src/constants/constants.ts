@@ -58,6 +58,7 @@ export const DBD_CONSTANTS = {
 export enum SurvivorIntention {
   IDLE = 'IDLE',
   REPAIR = 'REPAIR',
+  ESCAPE = 'ESCAPE',
 };
 
 export enum KillerIntention {
