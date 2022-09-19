@@ -38,9 +38,10 @@ export const DBD_CONSTANTS = {
   SURVIVOR: {
     radius: 8.5,
     defaultSpeed: 4,
+    colors: ['blue', 'green', 'orange', 'yellow'],
     image: {
-      name: 'blue_ball',
-      path: 'assets/blue_ball-17x17.png',
+      name: 'COLOR_ball',
+      path: 'assets/COLOR_ball-17x17.png',
     },
   },
   KILLER: {

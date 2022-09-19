@@ -23,6 +23,9 @@ export default class Demo extends Phaser.Scene {
     const { GENERATOR, SURVIVOR, KILLER } = DBD_CONSTANTS;
     const { CROSSHAIR } = SIMULATOR_CONSTANTS;
     this.load.image(GENERATOR.image.name, GENERATOR.image.path);
+    for (const color of SURVIVOR.colors) {
+      this.load.image(SURVIVOR.image.name.replace('COLOR', color), SURVIVOR.image.path.replace('COLOR', color));
+    }
     this.load.image(SURVIVOR.image.name, SURVIVOR.image.path);
     this.load.image(KILLER.image.name, KILLER.image.path);
     this.load.image(CROSSHAIR.image.name, CROSSHAIR.image.path);
@@ -163,7 +166,7 @@ export default class Demo extends Phaser.Scene {
       const survivorInstance = this.physics.add.image(
         coordinates.x,
         coordinates.y,
-        'blue_ball',
+        DBD_CONSTANTS.SURVIVOR.image.name.replace('COLOR', DBD_CONSTANTS.SURVIVOR.colors[i]),
       );
 
       circlesOccupiedSpace.push(
