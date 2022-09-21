@@ -26,7 +26,14 @@ export class Survivor extends Phaser.Class {
  
    body: any;
  
-   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean, dummyMovement: boolean) {
+   constructor(
+     scene: Scene,
+     x: number,
+     y: number,
+     phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
+     controlledByIa: boolean,
+     dummyMovement: boolean
+    ) {
      super({});
      this.positionX = x;
      this.positionY = y;
