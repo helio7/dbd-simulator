@@ -308,7 +308,7 @@ export default class Demo extends Phaser.Scene {
           let down = wasdKeys.down.isDown;
           let left = wasdKeys.left.isDown;
   
-          const killerVelocity = DBD_CONSTANTS.KILLER.speed * SIMULATOR_CONSTANTS.PIXELS_PER_DBD_METER;
+          const killerVelocity = DBD_CONSTANTS.KILLER.speed * SIMULATOR_CONSTANTS.PIXELS_PER_DBD_METER * SIMULATOR_CONSTANTS.SPEED_MULTIPLIER;
   
           if (up) yVelocity -= killerVelocity;
           if (down) yVelocity += killerVelocity;
