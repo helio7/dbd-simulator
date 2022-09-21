@@ -22,6 +22,17 @@ export const SIMULATOR_CONSTANTS = {
   ACTIVE_IA: {
     killer: false,
   },
+  UI: {
+    SURVIVOR_PORTRAIT: {
+      width: 51,
+      height: 51,
+      image: {
+        name: 'COLOR_ball_portrait',
+        path: 'assets/COLOR_ball-51x51.png',
+      },
+      yMargin: 25
+    },
+  },
 };
 
 export const DBD_CONSTANTS = {

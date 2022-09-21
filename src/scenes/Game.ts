@@ -21,10 +21,11 @@ export default class Demo extends Phaser.Scene {
 
   preload() {
     const { GENERATOR, SURVIVOR, KILLER } = DBD_CONSTANTS;
-    const { CROSSHAIR } = SIMULATOR_CONSTANTS;
+    const { CROSSHAIR, UI } = SIMULATOR_CONSTANTS;
     this.load.image(GENERATOR.image.name, GENERATOR.image.path);
     for (const color of SURVIVOR.colors) {
       this.load.image(SURVIVOR.image.name.replace('COLOR', color), SURVIVOR.image.path.replace('COLOR', color));
+      this.load.image(UI.SURVIVOR_PORTRAIT.image.name.replace('COLOR', color), UI.SURVIVOR_PORTRAIT.image.path.replace('COLOR', color));
     }
     this.load.image(SURVIVOR.image.name, SURVIVOR.image.path);
     this.load.image(KILLER.image.name, KILLER.image.path);
@@ -181,6 +182,13 @@ export default class Demo extends Phaser.Scene {
 
       survivors.push(
         new Survivor(this, coordinates.x, coordinates.y, survivorInstance, true, false),
+      );
+
+      const { STATUS_BAR, UI: { SURVIVOR_PORTRAIT: { yMargin, height, image } } } = SIMULATOR_CONSTANTS;
+      this.physics.add.image(
+        STATUS_BAR.dimensions.x / 2,
+        yMargin + height / 2 + (yMargin + height) * i,
+        image.name.replace('COLOR', SURVIVOR.colors[i])
       );
     }
 
