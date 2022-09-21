@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { Coordinates, DBD_CONSTANTS, SIMULATOR_CONSTANTS, SurvivorIntention } from "../constants/constants";
+import { Coordinates, DBD_CONSTANTS, SIMULATOR_CONSTANTS, SurvivorHealthState, SurvivorIntention } from "../constants/constants";
 import { distanceBetween2Points } from "../functions/geometry/distanceBetween2Points";
 import { getUnitVectorFromPoint1To2 } from "../functions/geometry/getUnitVectorFromPoint1To2";
 import { Generator } from "./generator";
@@ -13,13 +13,15 @@ export class Survivor extends Phaser.Class {
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
    controlledByIa: boolean;
    dummyMovement: boolean;
+   portraitCharacterImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+   portraitStatusImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
    intention: SurvivorIntention;
    repairPositionFocused: {
      repairPositionId: number,
      generatorId: number
    } | null;
  
-   healthStates: number;
+   healthState: SurvivorHealthState;
    isAdvancingTowardsObjective: boolean;
    isInHurtAnimation: boolean;
    hurtAnimationEndsAt: number | null;
@@ -32,7 +34,9 @@ export class Survivor extends Phaser.Class {
      y: number,
      phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
      controlledByIa: boolean,
-     dummyMovement: boolean
+     dummyMovement: boolean,
+     portraitCharacterImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
+     portraitStatusImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
     ) {
      super({});
      this.positionX = x;
@@ -42,10 +46,12 @@ export class Survivor extends Phaser.Class {
      this.phaserInstance = phaserInstance;
      this.controlledByIa = controlledByIa;
      this.dummyMovement = dummyMovement;
+     this.portraitCharacterImageInstance = portraitCharacterImageInstance;
+     this.portraitStatusImageInstance = portraitStatusImageInstance;
      this.intention = SurvivorIntention.IDLE;
      this.repairPositionFocused = null;
  
-     this.healthStates = 2;
+     this.healthState = SurvivorHealthState.NORMAL;
      
      this.isInHurtAnimation = false;
      this.hurtAnimationEndsAt = null;
@@ -56,8 +62,20 @@ export class Survivor extends Phaser.Class {
      this.body = scene.add.group();
    }
  
-   loseHealthState = () => {
-     this.healthStates -= 1;
+   receiveBasicAttack = () => {
+     const { NORMAL, INJURED, DOWNED } = SurvivorHealthState;
+     switch (this.healthState) {
+       case NORMAL:
+         this.healthState = INJURED;
+         this.portraitStatusImageInstance.setTexture('injured');
+         break;
+       case INJURED:
+         this.healthState = DOWNED;
+         this.portraitStatusImageInstance.setTexture('transparent');
+         this.portraitCharacterImageInstance.setTexture('downed');
+       default:
+         break;
+     }
    };
  
    beginHurtAnimation = (time: number) => {

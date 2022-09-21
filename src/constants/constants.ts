@@ -67,6 +67,14 @@ export const DBD_CONSTANTS = {
   MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS: 12.5,
 };
 
+export enum SurvivorHealthState {
+  NORMAL = 'NORMAL',
+  INJURED = 'INJURED',
+  DOWNED = 'DOWNED',
+  CARRIED = 'CARRIED',
+  HOOKED = 'HOOKED',
+}
+
 export enum SurvivorIntention {
   IDLE = 'IDLE',
   REPAIR = 'REPAIR',

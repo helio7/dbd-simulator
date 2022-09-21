@@ -30,6 +30,9 @@ export default class Demo extends Phaser.Scene {
     this.load.image(SURVIVOR.image.name, SURVIVOR.image.path);
     this.load.image(KILLER.image.name, KILLER.image.path);
     this.load.image(CROSSHAIR.image.name, CROSSHAIR.image.path);
+    this.load.image('transparent', 'assets/transparent-51x51.png');
+    this.load.image('injured', 'assets/injured-51x51.png');
+    this.load.image('downed', 'assets/downed-51x51.png');
   }
 
   create() {
@@ -180,15 +183,21 @@ export default class Demo extends Phaser.Scene {
       survivorInstance.setCollideWorldBounds(true);
       survivorInstance.body.setBoundsRectangle(map);
 
-      survivors.push(
-        new Survivor(this, coordinates.x, coordinates.y, survivorInstance, true, false),
-      );
-
       const { STATUS_BAR, UI: { SURVIVOR_PORTRAIT: { yMargin, height, image } } } = SIMULATOR_CONSTANTS;
-      this.physics.add.image(
+      const portraitCharacterImageInstance = this.physics.add.image(
         STATUS_BAR.dimensions.x / 2,
         yMargin + height / 2 + (yMargin + height) * i,
         image.name.replace('COLOR', SURVIVOR.colors[i])
+      );
+
+      const portraitStatusImageInstance = this.physics.add.image(
+        STATUS_BAR.dimensions.x / 2,
+        yMargin + height / 2 + (yMargin + height) * i,
+        'transparent',
+      );
+
+      survivors.push(
+        new Survivor(this, coordinates.x, coordinates.y, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
       );
     }
 
@@ -278,7 +287,7 @@ export default class Demo extends Phaser.Scene {
         } else if (survivor.controlledByIa) simulateSurvivorBehavior(generators, survivor, time, killers);
       }
       if (survivor.collideWithKiller(killers[0]) && !survivor.isInHurtAnimation) {
-        survivor.loseHealthState();
+        survivor.receiveBasicAttack();
         survivor.beginHurtAnimation(time + 1000);
         console.log('COLLISION');
       }
