@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
-import { Coordinates, DBD_CONSTANTS, SIMULATOR_CONSTANTS, SurvivorHealthState, SurvivorIntention } from "../constants/constants";
+import { Coordinates, DBD_CONSTANTS, SurvivorHealthState, SurvivorIntention } from "../constants/constants";
 import { distanceBetween2Points } from "../functions/geometry/distanceBetween2Points";
-import { getUnitVectorFromPoint1To2 } from "../functions/geometry/getUnitVectorFromPoint1To2";
+import { moveTowardsOrAwayFrom } from "../functions/ia";
 import { Generator } from "./generator";
 import { Killer } from "./killer";
 
@@ -27,6 +27,8 @@ export class Survivor extends Phaser.Class {
    hurtAnimationEndsAt: number | null;
  
    body: any;
+   movementSpeedModifier: number = 1;
+   isSurvivor: boolean = true;
  
    constructor(
      scene: Scene,
@@ -77,6 +79,10 @@ export class Survivor extends Phaser.Class {
          break;
      }
    };
+
+   applyMovementSpeedModifier = (percentageBonus: number) => {
+     this.movementSpeedModifier += percentageBonus;
+   }
  
    beginHurtAnimation = (time: number) => {
      this.isInHurtAnimation = true;
@@ -130,28 +136,17 @@ export class Survivor extends Phaser.Class {
  
    runTowardsObjective = (
      objectiveCoordinates: Coordinates,
-   ): { xComponent: number, yComponent: number } => {
-     const { xComponent, yComponent } = this.repairPositionFocused ?
-       getUnitVectorFromPoint1To2(
-         this.positionX,
-         this.positionY,
-         objectiveCoordinates.x,
-         objectiveCoordinates.y,
-       ): { xComponent: 0, yComponent: 0 };
-     const { SURVIVOR } = DBD_CONSTANTS;
-     const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
- 
-     const finalSpeedX = xComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-     const finalSpeedY = yComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
- 
-     this.speedX = finalSpeedX;
-     this.speedY = finalSpeedY;
-     return { xComponent: finalSpeedX, yComponent: finalSpeedY };
+   ) => {
+    if (!this.repairPositionFocused) {
+      this.speedX = 0;
+      this.speedY = 0;
+      this.phaserInstance.setVelocity(0, 0);
+    } else moveTowardsOrAwayFrom(this, objectiveCoordinates, true);
    }
 
    runAwayFromNearestKiller = (
      killers: Killer[],
-   ): { xComponent: number, yComponent: number } => {
+   ) => {
      let shortestDistance = null;
     let positionToRunFrom: Coordinates | null = null;
     for (const killer of killers) {
@@ -164,25 +159,6 @@ export class Survivor extends Phaser.Class {
         positionToRunFrom = { x: killer.positionX, y: killer.positionY };
       }
     }
-
-    const { xComponent, yComponent } = getUnitVectorFromPoint1To2(
-      this.positionX,
-      this.positionY,
-      positionToRunFrom!.x,
-      positionToRunFrom!.y,
-    );
-
-    const { SURVIVOR } = DBD_CONSTANTS;
-     const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
-
-    const finalSpeedX = -1 * xComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-    const finalSpeedY = -1 * yComponent * SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-
-    this.speedX = finalSpeedX;
-    this.speedY = finalSpeedY;
-
-    this.phaserInstance.setVelocity(finalSpeedX, finalSpeedY);
-
-    return { xComponent: positionToRunFrom!.x, yComponent: positionToRunFrom!.y };
+    moveTowardsOrAwayFrom(this, positionToRunFrom!, false);
    }
 }

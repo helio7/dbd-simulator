@@ -3,18 +3,14 @@ import { Killer } from "../../classes/killer";
 import { Survivor } from "../../classes/survivor";
 import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorIntention } from "../../constants/constants";
 import { distanceBetween2Points } from "../geometry/distanceBetween2Points";
+import { getUnitVectorFromPoint1To2 } from "../geometry/getUnitVectorFromPoint1To2";
 
 export function simulateKillerBehavior(killer: Killer, survivors: Survivor[]) {
-   if (killer.intention === KillerIntention.IDLE) {
-     killer.intention = KillerIntention.CHASE;
-     killer.focusNearestSurvivor(survivors);
-     const { xComponent, yComponent } = killer.runTowardsObjective();
-     killer.phaserInstance.setVelocity(xComponent, yComponent);
-   } else if (killer.intention === KillerIntention.CHASE) {
-     killer.focusNearestSurvivor(survivors);
-     const { xComponent, yComponent } = killer.runTowardsObjective();
-     killer.phaserInstance.setVelocity(xComponent, yComponent);
-   }
+  if (killer.intention === KillerIntention.IDLE || killer.intention === KillerIntention.CHASE) {
+    if (killer.intention === KillerIntention.IDLE) killer.intention = KillerIntention.CHASE;
+    killer.focusNearestSurvivor(survivors);
+    killer.runTowardsObjective();
+  }
 }
 
 export function simulateSurvivorBehavior(generators: Map<number, Generator>, survivor: Survivor, time: number, killers: Killer[]) {
@@ -42,7 +38,8 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
       positionToRunFrom = { x: killer.positionX, y: killer.positionY };
     }
   }
-  if (shortestDistance! < DBD_CONSTANTS.KILLER.defaultTerrorRadius * SIMULATOR_CONSTANTS.PIXELS_PER_DBD_METER) {
+  const { IA, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
+  if (shortestDistance! < IA.survivorsTerrorRadiusEscapeThreshold * DBD_CONSTANTS.KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER) {
     survivor.intention = SurvivorIntention.ESCAPE;
   } else {
     survivor.intention = SurvivorIntention.REPAIR;
@@ -51,12 +48,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
 
   switch (survivor.intention) {
     case SurvivorIntention.REPAIR:
-      if (repairPosition) {
-        const { xComponent, yComponent } = survivor.runTowardsObjective(
-          repairPosition?.coordinates,
-        );
-        survivor.phaserInstance.setVelocity(xComponent, yComponent);
-      }
+      if (repairPosition) survivor.runTowardsObjective(repairPosition.coordinates);
       if (
         generator &&
         repairPosition &&
@@ -104,3 +96,24 @@ export function simulateDummyMovement(survivor: Survivor) {
     survivor.speedX = SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
   }
 }
+
+export const moveTowardsOrAwayFrom = (character: Survivor | Killer, point: Coordinates, towards: boolean) => {
+  const { xComponent, yComponent } = getUnitVectorFromPoint1To2(
+    character.positionX,
+    character.positionY,
+    point.x,
+    point.y,
+  );
+  const { KILLER, SURVIVOR } = DBD_CONSTANTS;
+  const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
+
+  let speed: number = 0;
+  if ('isSurvivor' in character) speed = SURVIVOR.defaultSpeed;
+  else if ('isKiller' in character) speed = KILLER.speed;
+
+  const finalSpeedX = xComponent * (towards ? 1 : -1) * speed * character.movementSpeedModifier * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
+  const finalSpeedY = yComponent * (towards ? 1 : -1) * speed * character.movementSpeedModifier * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
+  character.speedX = finalSpeedX;
+  character.speedY = finalSpeedY;
+  character.phaserInstance.setVelocity(finalSpeedX, finalSpeedY);
+};

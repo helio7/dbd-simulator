@@ -178,7 +178,6 @@ export default class Demo extends Phaser.Scene {
       );
 
       survivorInstance.setCircle(SURVIVOR.radius);
-      survivorInstance.setMaxVelocity(SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER, SURVIVOR.defaultSpeed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER);
       survivorInstance.setBounce(1);
       survivorInstance.setCollideWorldBounds(true);
       survivorInstance.body.setBoundsRectangle(map);
@@ -219,7 +218,7 @@ export default class Demo extends Phaser.Scene {
     terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
 
     killers.push(
-      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, false, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
+      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, SIMULATOR_CONSTANTS.ACTIVE_IA.killers, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
     );
 
     for (const survivor of survivors) {
@@ -267,6 +266,7 @@ export default class Demo extends Phaser.Scene {
     }, this);
   }
 
+  // time => miliseconds
   update(time: number, delta: number): void {
 
     // Update positions.
@@ -289,6 +289,20 @@ export default class Demo extends Phaser.Scene {
       if (survivor.collideWithKiller(killers[0]) && !survivor.isInHurtAnimation) {
         survivor.receiveBasicAttack();
         survivor.beginHurtAnimation(time + 1000);
+        survivor.applyMovementSpeedModifier(0.5);
+        this.time.addEvent({
+          delay: 1800,
+          callback: () => {
+            survivor.applyMovementSpeedModifier(-0.5);
+          },
+        });
+        killers[0].applyMovementSpeedModifier(-0.5);
+        this.time.addEvent({
+          delay: 2700,
+          callback: () => {
+            killers[0].applyMovementSpeedModifier(0.5);
+          },
+        });
         console.log('COLLISION');
       }
       if (survivor.controlledByIa && survivor.intention === SurvivorIntention.REPAIR) {

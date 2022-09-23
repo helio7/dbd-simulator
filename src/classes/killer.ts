@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
-import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS } from "../constants/constants";
+import { Coordinates, KillerIntention } from "../constants/constants";
 import { distanceBetween2Points } from "../functions/geometry/distanceBetween2Points";
-import { getUnitVectorFromPoint1To2 } from "../functions/geometry/getUnitVectorFromPoint1To2";
+import { moveTowardsOrAwayFrom } from "../functions/ia";
 import { Survivor } from "./survivor";
 
 export class Killer extends Phaser.Class {
@@ -15,6 +15,8 @@ export class Killer extends Phaser.Class {
    controlledByIa: boolean;
    terrorRadius: number;
    terrorRadiusIndicatorInstance: Phaser.GameObjects.Graphics;
+   movementSpeedModifier: number = 1;
+   isKiller: boolean = true;
  
    body: any;
  
@@ -53,17 +55,15 @@ export class Killer extends Phaser.Class {
      this.objectiveFocused = objectiveCoordinates;
    };
  
-   runTowardsObjective = (): { xComponent: number, yComponent: number } => {
-     const { xComponent, yComponent } = this.objectiveFocused ?
-       getUnitVectorFromPoint1To2(this.positionX, this.positionY, this.objectiveFocused?.x, this.objectiveFocused?.y): { xComponent: 0, yComponent: 0 };
-     const { KILLER } = DBD_CONSTANTS;
-     const { PIXELS_PER_DBD_METER, SPEED_MULTIPLIER } = SIMULATOR_CONSTANTS;
- 
-     const finalSpeedX = xComponent * KILLER.speed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
-     const finalSpeedY = yComponent * KILLER.speed * PIXELS_PER_DBD_METER * SPEED_MULTIPLIER;
- 
-     this.speedX = finalSpeedX;
-     this.speedY = finalSpeedY;
-     return { xComponent: finalSpeedX, yComponent: finalSpeedY };
+   runTowardsObjective = () => {
+    if (!this.objectiveFocused) {
+      this.speedX = 0;
+      this.speedY = 0;
+      this.phaserInstance.setVelocity(0, 0);
+    } else moveTowardsOrAwayFrom(this, this.objectiveFocused, true);
+   }
+
+   applyMovementSpeedModifier = (percentageBonus: number) => {
+    this.movementSpeedModifier += percentageBonus;
    }
 }

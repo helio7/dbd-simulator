@@ -11,7 +11,7 @@ export const SIMULATOR_CONSTANTS = {
     },
   },
   PIXELS_PER_DBD_METER: 6,
-  SPEED_MULTIPLIER: 1, // 10,
+  SPEED_MULTIPLIER: 1,
   CROSSHAIR: {
     radius: 5,
     image: {
@@ -20,7 +20,10 @@ export const SIMULATOR_CONSTANTS = {
     },
   },
   ACTIVE_IA: {
-    killer: false,
+    killers: true,
+  },
+  IA: {
+    survivorsTerrorRadiusEscapeThreshold: 0.25,
   },
   UI: {
     SURVIVOR_PORTRAIT: {
