@@ -28,20 +28,23 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     }
   }
 
-  let shortestDistance = null;
+  let shortestDistanceToAKiller = null;
   let positionToRunFrom: Coordinates | null = null;
+  const { phaserInstance: { x: survivorXPosition, y: survivorYPosition } } = survivor;
   for (const killer of killers) {
-    const distance = distanceBetween2Points(
-      survivor.phaserInstance.x, survivor.phaserInstance.y,
-      killer.phaserInstance.x, killer.phaserInstance.y,
+    const { phaserInstance: { x: killerXPosition, y: killerYPosition } } = killer;
+    const distanceBetweenKillerAndSurvivor = distanceBetween2Points(
+      survivorXPosition, survivorYPosition,
+      killerXPosition, killerYPosition,
     );
-    if (shortestDistance === null || distance < shortestDistance) {
-      shortestDistance = distance;
-      positionToRunFrom = { x: killer.phaserInstance.x, y: killer.phaserInstance.y };
+    if (shortestDistanceToAKiller === null || distanceBetweenKillerAndSurvivor < shortestDistanceToAKiller) {
+      shortestDistanceToAKiller = distanceBetweenKillerAndSurvivor;
+      positionToRunFrom = { x: killerXPosition, y: killerYPosition };
     }
   }
+  
   const { IA, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
-  if (shortestDistance! < IA.survivorsTerrorRadiusEscapeThreshold * DBD_CONSTANTS.KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER) {
+  if (shortestDistanceToAKiller! < IA.survivorsTerrorRadiusEscapeThreshold * DBD_CONSTANTS.KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER) {
     survivor.intention = SurvivorIntention.ESCAPE;
   } else {
     survivor.intention = SurvivorIntention.REPAIR;
