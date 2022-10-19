@@ -41,7 +41,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
 
   switch (survivor.intention) {
     case SurvivorIntention.REPAIR:
-      if (repairPosition) survivor.runTowardsObjective(repairPosition.coordinates);
+      if (repairPosition) moveTowardsOrAwayFrom(survivor, repairPosition.coordinates, true);
       if (
         generator &&
         repairPosition &&

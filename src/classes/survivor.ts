@@ -110,16 +110,6 @@ export class Survivor extends Phaser.Class {
       };
      }
    };
- 
-   runTowardsObjective = (
-     objectiveCoordinates: Coordinates,
-   ) => {
-    if (!this.repairPositionFocused) {
-      this.speedX = 0;
-      this.speedY = 0;
-      this.phaserInstance.setVelocity(0, 0);
-    } else moveTowardsOrAwayFrom(this, objectiveCoordinates, true);
-   }
 
    findShortestDistanceToARepairPosition = (
     generators: Generator[] | IterableIterator<Generator>,
