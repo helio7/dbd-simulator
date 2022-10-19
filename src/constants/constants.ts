@@ -68,6 +68,7 @@ export const DBD_CONSTANTS = {
     defaultTerrorRadius: 32,
   },
   MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS: 12.5,
+  CINEMATIC_BEGINNING_DURATION_IN_MS: 3000,
 };
 
 export enum SurvivorHealthState {

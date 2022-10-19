@@ -14,6 +14,8 @@ const killers: Killer[] = [];
 let wasdKeys: any;
 let crosshair: any;
 
+let gameStartMilisecond: number | null = null;
+
 export default class Demo extends Phaser.Scene {
   constructor() {
     super('GameScene');
@@ -47,7 +49,9 @@ export default class Demo extends Phaser.Scene {
       CROSSHAIR
     } = SIMULATOR_CONSTANTS;
 
-    const { KILLER, SURVIVOR, GENERATOR } = DBD_CONSTANTS;
+    const { KILLER, SURVIVOR, GENERATOR, CINEMATIC_BEGINNING_DURATION_IN_MS } = DBD_CONSTANTS;
+
+    gameStartMilisecond = this.time.now + CINEMATIC_BEGINNING_DURATION_IN_MS;
 
     const map = new Phaser.Geom.Rectangle(
       STATUS_BAR.dimensions.x,
@@ -280,7 +284,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     for (const survivor of survivors) {
-      if (time > 3000) {
+      if (gameStartMilisecond && time > gameStartMilisecond) {
         if (survivor.dummyMovement) {
           simulateDummyMovement(survivor);
           continue;
@@ -311,7 +315,7 @@ export default class Demo extends Phaser.Scene {
     }
 
     for (const killer of killers) {
-      if (time > 3000) {
+      if (gameStartMilisecond && time > gameStartMilisecond) {
         if (killer.controlledByIa) simulateKillerBehavior(killer, survivors);
         else {
           let xVelocity: number = 0;
