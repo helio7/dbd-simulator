@@ -178,7 +178,11 @@ export default class Demo extends Phaser.Scene {
 
     this.physics.add.collider(killerInstance, generatorObjectsStaticPhysicsGroup);
 
-    crosshair = this.add.sprite(400, 300, 'crosshair');
+    crosshair = this.add.sprite(
+      PLAYABLE_MAP.position.x + PLAYABLE_MAP.dimensions.x / 2,
+      PLAYABLE_MAP.position.y + PLAYABLE_MAP.dimensions.y / 2,
+      'crosshair',
+    );
 
     wasdKeys = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
