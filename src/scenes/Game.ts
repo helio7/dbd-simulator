@@ -44,9 +44,6 @@ export default class Demo extends Phaser.Scene {
   }
 
   create() {
-    const rectanglesOccupiedSpace: Phaser.Geom.Rectangle[] = [];
-    const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
-
     const {
       STATUS_BAR,
       PLAYABLE_MAP,
@@ -68,6 +65,7 @@ export default class Demo extends Phaser.Scene {
       .lineStyle(1, 0xffffff)
       .strokeRectShape(playableMap);
 
+    const rectanglesOccupiedSpace: Phaser.Geom.Rectangle[] = [];
     let myGenerators = this.physics.add.staticGroup();
     for (let i = 0; i < 7; i++) {
       let coordinates = calculateGeneratorCoordinates();
@@ -127,6 +125,7 @@ export default class Demo extends Phaser.Scene {
       );
     }
 
+    const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
     for (let i = 0; i < 4; i++) {
       let coordinates = calculateSurvivorCoordinates();
 
