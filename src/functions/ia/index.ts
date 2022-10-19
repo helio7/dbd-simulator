@@ -29,7 +29,6 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
   }
 
   let shortestDistanceToAKiller = null;
-  let positionToRunFrom: Coordinates | null = null;
   const { phaserInstance: { x: survivorXPosition, y: survivorYPosition } } = survivor;
   for (const killer of killers) {
     const { phaserInstance: { x: killerXPosition, y: killerYPosition } } = killer;
@@ -39,7 +38,6 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     );
     if (shortestDistanceToAKiller === null || distanceBetweenKillerAndSurvivor < shortestDistanceToAKiller) {
       shortestDistanceToAKiller = distanceBetweenKillerAndSurvivor;
-      positionToRunFrom = { x: killerXPosition, y: killerYPosition };
     }
   }
   
