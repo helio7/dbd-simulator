@@ -51,7 +51,6 @@ export default class Demo extends Phaser.Scene {
       STATUS_BAR,
       PLAYABLE_MAP,
       PIXELS_PER_DBD_METER,
-      SPEED_MULTIPLIER,
       CROSSHAIR
     } = SIMULATOR_CONSTANTS;
 
