@@ -203,8 +203,8 @@ export default class Demo extends Phaser.Scene {
         const crosshairMaximumX = STATUS_BAR.dimensions.x + PLAYABLE_MAP.dimensions.x - 0.5 * CROSSHAIR.radius;
         if (crosshair.x <= crosshairMinimumX) crosshair.x = crosshairMinimumX;
         else if (crosshair.x >= crosshairMaximumX) crosshair.x = crosshairMaximumX;
-        const crosshairMinimumY = 0.5 * CROSSHAIR.radius;
-        const crosshairMaximumY = PLAYABLE_MAP.dimensions.y - 0.5 * CROSSHAIR.radius;
+        const crosshairMinimumY = PLAYABLE_MAP.position.y + 0.5 * CROSSHAIR.radius;
+        const crosshairMaximumY = PLAYABLE_MAP.position.y + PLAYABLE_MAP.dimensions.y - 0.5 * CROSSHAIR.radius;
         if (crosshair.y <= crosshairMinimumY) crosshair.y = crosshairMinimumY;
         else if (crosshair.y >= crosshairMaximumY) crosshair.y = crosshairMaximumY;
       }
