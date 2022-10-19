@@ -36,7 +36,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     survivor.intention = SurvivorIntention.ESCAPE;
   } else {
     survivor.intention = SurvivorIntention.REPAIR;
-    survivor.focusNearestGenerator(generators.values());
+    survivor.focusNearestRepairPosition(generators.values());
   }
 
   switch (survivor.intention) {

@@ -99,7 +99,7 @@ export class Survivor extends Phaser.Class {
      else return false;
    };
  
-   focusNearestGenerator = (
+   focusNearestRepairPosition = (
      generators: Generator[] | IterableIterator<Generator>
    ) => {
      const { repairPositionId, generatorId } = this.findShortestDistanceToARepairPosition(generators);

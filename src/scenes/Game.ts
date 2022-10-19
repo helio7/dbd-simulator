@@ -144,7 +144,7 @@ export default class Demo extends Phaser.Scene {
         console.log('COLLISION');
       }
       if (survivor.controlledByIa && survivor.intention === SurvivorIntention.REPAIR) {
-        if (!survivor.repairPositionFocused) survivor.focusNearestGenerator(generators.values());
+        if (!survivor.repairPositionFocused) survivor.focusNearestRepairPosition(generators.values());
       }
     }
 
