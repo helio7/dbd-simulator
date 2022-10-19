@@ -58,7 +58,7 @@ export default class Demo extends Phaser.Scene {
 
     gameStartMilisecond = this.time.now + CINEMATIC_BEGINNING_DURATION_IN_MS;
 
-    const map = new Phaser.Geom.Rectangle(
+    const playableMap = new Phaser.Geom.Rectangle(
       STATUS_BAR.dimensions.x,
       PLAYABLE_MAP.position.y,
       PLAYABLE_MAP.dimensions.x,
@@ -66,7 +66,7 @@ export default class Demo extends Phaser.Scene {
     );
     this.add.graphics()
       .lineStyle(1, 0xffffff)
-      .strokeRectShape(map);
+      .strokeRectShape(playableMap);
 
     const spawnableMap = new Phaser.Geom.Rectangle(
       STATUS_BAR.dimensions.x + 0.1 * PLAYABLE_MAP.dimensions.x,
@@ -189,7 +189,7 @@ export default class Demo extends Phaser.Scene {
       survivorInstance.setCircle(SURVIVOR.radius);
       survivorInstance.setBounce(1);
       survivorInstance.setCollideWorldBounds(true);
-      survivorInstance.body.setBoundsRectangle(map);
+      survivorInstance.body.setBoundsRectangle(playableMap);
 
       const { STATUS_BAR, UI: { SURVIVOR_PORTRAIT: { yMargin, height, image } } } = SIMULATOR_CONSTANTS;
       const portraitCharacterImageInstance = this.physics.add.image(
@@ -219,7 +219,7 @@ export default class Demo extends Phaser.Scene {
     killerInstance.setCircle(KILLER.radius);
     killerInstance.setBounce(1);
     killerInstance.setCollideWorldBounds(true);
-    killerInstance.body.setBoundsRectangle(map);
+    killerInstance.body.setBoundsRectangle(playableMap);
 
     const terrorRadiusIndicatorInstance = this.add.graphics()
       .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER);
