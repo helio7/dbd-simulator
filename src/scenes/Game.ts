@@ -47,11 +47,10 @@ export default class Demo extends Phaser.Scene {
     const {
       STATUS_BAR,
       PLAYABLE_MAP,
-      PIXELS_PER_DBD_METER,
       CROSSHAIR
     } = SIMULATOR_CONSTANTS;
 
-    const { KILLER, SURVIVOR, CINEMATIC_BEGINNING_DURATION_IN_MS } = DBD_CONSTANTS;
+    const { CINEMATIC_BEGINNING_DURATION_IN_MS } = DBD_CONSTANTS;
 
     gameStartMilisecond = this.time.now + CINEMATIC_BEGINNING_DURATION_IN_MS;
 
