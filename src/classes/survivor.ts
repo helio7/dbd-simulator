@@ -6,8 +6,6 @@ import { Generator } from "./generator";
 import { Killer } from "./killer";
 
 export class Survivor extends Phaser.Class {
-   positionX: number;
-   positionY: number;
    speedX: number;
    speedY: number;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -32,8 +30,6 @@ export class Survivor extends Phaser.Class {
  
    constructor(
      scene: Scene,
-     x: number,
-     y: number,
      phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
      controlledByIa: boolean,
      dummyMovement: boolean,
@@ -41,8 +37,6 @@ export class Survivor extends Phaser.Class {
      portraitStatusImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
     ) {
      super({});
-     this.positionX = x;
-     this.positionY = y;
      this.speedX = 0;
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
@@ -95,9 +89,10 @@ export class Survivor extends Phaser.Class {
    }
  
    collideWithKiller = (killer: Killer) => {
+     const { x, y } = this.phaserInstance;
      if (
        distanceBetween2Points(
-         this.positionX, this.positionY,
+        x, y,
          killer.positionX, killer.positionY
        ) <= DBD_CONSTANTS.SURVIVOR.radius + DBD_CONSTANTS.KILLER.radius
      ) return true;
@@ -113,8 +108,9 @@ export class Survivor extends Phaser.Class {
      for (const generator of generators) {
        for (const { id, generatorId: genId, isOccupied, coordinates } of generator.repairPositions.values()) {
          if (!isOccupied) {
+          const { x, y } = this.phaserInstance;
           const distance = distanceBetween2Points(
-            this.positionX, this.positionY,
+            x, y,
             coordinates.x, coordinates.y,
           );
           if (shortestDistance === null || distance < shortestDistance) {

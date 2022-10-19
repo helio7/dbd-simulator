@@ -41,14 +41,14 @@ export class Killer extends Phaser.Class {
      for (const survivor of survivors) {
        const distance = distanceBetween2Points(
          this.positionX, this.positionY,
-         survivor.positionX, survivor.positionY,
+         survivor.phaserInstance.x, survivor.phaserInstance.y,
        );
  
        if (shortestDistance === null || distance < shortestDistance) {
          shortestDistance = distance;
          objectiveCoordinates = {
-           x: survivor.positionX,
-           y: survivor.positionY,
+           x: survivor.phaserInstance.x,
+           y: survivor.phaserInstance.y,
          };
        }
      }

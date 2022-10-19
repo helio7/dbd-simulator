@@ -119,10 +119,6 @@ export default class Demo extends Phaser.Scene {
   update(time: number, delta: number): void {
 
     // Update positions.
-    for (const survivor of survivors) {
-      survivor.positionX = survivor.phaserInstance.x;
-      survivor.positionY = survivor.phaserInstance.y;
-    }
     for (const killer of killers) {
       killer.positionX = killer.phaserInstance.x;
       killer.positionY = killer.phaserInstance.y;
@@ -339,7 +335,7 @@ function addSurvivorsToMap(
     );
 
     survivors.push(
-      new Survivor(gameScene, coordinates.x, coordinates.y, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
+      new Survivor(gameScene, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
     );
 
     survivorInstances.push(survivorInstance);

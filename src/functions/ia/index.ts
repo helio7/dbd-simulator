@@ -30,7 +30,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
   let positionToRunFrom: Coordinates | null = null;
   for (const killer of killers) {
     const distance = distanceBetween2Points(
-      survivor.positionX, survivor.positionY,
+      survivor.phaserInstance.x, survivor.phaserInstance.y,
       killer.positionX, killer.positionY,
     );
     if (shortestDistance === null || distance < shortestDistance) {
@@ -53,15 +53,15 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
         generator &&
         repairPosition &&
         distanceBetween2Points(
-          survivor.positionX,
-          survivor.positionY,
+          survivor.phaserInstance.x,
+          survivor.phaserInstance.y,
           repairPosition.coordinates.x,
           repairPosition.coordinates.y,
         ) <= DBD_CONSTANTS.SURVIVOR.radius &&
         !repairPosition.isOccupied
       ) {
-        survivor.positionX = repairPosition.coordinates.x;
-        survivor.positionY = repairPosition.coordinates.y;
+        survivor.phaserInstance.x = repairPosition.coordinates.x;
+        survivor.phaserInstance.y = repairPosition.coordinates.y;
         survivor.phaserInstance.setPosition(
           repairPosition.coordinates.x, repairPosition.coordinates.y,
         );
@@ -99,8 +99,8 @@ export function simulateDummyMovement(survivor: Survivor) {
 
 export const moveTowardsOrAwayFrom = (character: Survivor | Killer, point: Coordinates, towards: boolean) => {
   const { xComponent, yComponent } = getUnitVectorFromPoint1To2(
-    character.positionX,
-    character.positionY,
+    'positionX' in character ? character.positionX : character.phaserInstance.x,
+    'positionY' in character ? character.positionY : character.phaserInstance.y,
     point.x,
     point.y,
   );
