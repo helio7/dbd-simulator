@@ -31,11 +31,11 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
   for (const killer of killers) {
     const distance = distanceBetween2Points(
       survivor.phaserInstance.x, survivor.phaserInstance.y,
-      killer.positionX, killer.positionY,
+      killer.phaserInstance.x, killer.phaserInstance.y,
     );
     if (shortestDistance === null || distance < shortestDistance) {
       shortestDistance = distance;
-      positionToRunFrom = { x: killer.positionX, y: killer.positionY };
+      positionToRunFrom = { x: killer.phaserInstance.x, y: killer.phaserInstance.y };
     }
   }
   const { IA, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
@@ -99,8 +99,8 @@ export function simulateDummyMovement(survivor: Survivor) {
 
 export const moveTowardsOrAwayFrom = (character: Survivor | Killer, point: Coordinates, towards: boolean) => {
   const { xComponent, yComponent } = getUnitVectorFromPoint1To2(
-    'positionX' in character ? character.positionX : character.phaserInstance.x,
-    'positionY' in character ? character.positionY : character.phaserInstance.y,
+    character.phaserInstance.x,
+    character.phaserInstance.y,
     point.x,
     point.y,
   );

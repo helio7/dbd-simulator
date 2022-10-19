@@ -181,7 +181,7 @@ export default class Demo extends Phaser.Scene {
   
           killer.phaserInstance.setVelocity(xVelocity, yVelocity);
         }
-        killer.terrorRadiusIndicatorInstance.setPosition(killer.positionX, killer.positionY);
+        killer.terrorRadiusIndicatorInstance.setPosition(killer.phaserInstance.x, killer.phaserInstance.y);
       }
     }
   }
@@ -369,7 +369,7 @@ function addKillerToMap(
   terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
 
   killers.push(
-    new Killer(gameScene, initialPosition.x, initialPosition.y, killerInstance, SIMULATOR_CONSTANTS.ACTIVE_IA.killers, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
+    new Killer(gameScene, killerInstance, SIMULATOR_CONSTANTS.ACTIVE_IA.killers, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
   );
 
   return killerInstance;

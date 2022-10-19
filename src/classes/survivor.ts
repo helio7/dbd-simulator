@@ -93,7 +93,7 @@ export class Survivor extends Phaser.Class {
      if (
        distanceBetween2Points(
         x, y,
-         killer.positionX, killer.positionY
+         killer.phaserInstance.x, killer.phaserInstance.y,
        ) <= DBD_CONSTANTS.SURVIVOR.radius + DBD_CONSTANTS.KILLER.radius
      ) return true;
      else return false;
@@ -146,13 +146,14 @@ export class Survivor extends Phaser.Class {
      let shortestDistance = null;
     let positionToRunFrom: Coordinates | null = null;
     for (const killer of killers) {
+      const { x, y } = this.phaserInstance;
       const distance = distanceBetween2Points(
-        this.positionX, this.positionY,
-        killer.positionX, killer.positionY,
+        x, y,
+        killer.phaserInstance.x, killer.phaserInstance.y,
       );
       if (shortestDistance === null || distance < shortestDistance) {
         shortestDistance = distance;
-        positionToRunFrom = { x: killer.positionX, y: killer.positionY };
+        positionToRunFrom = { x: killer.phaserInstance.x, y: killer.phaserInstance.y };
       }
     }
     moveTowardsOrAwayFrom(this, positionToRunFrom!, false);

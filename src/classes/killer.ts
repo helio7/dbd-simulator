@@ -5,8 +5,6 @@ import { moveTowardsOrAwayFrom } from "../functions/ia";
 import { Survivor } from "./survivor";
 
 export class Killer extends Phaser.Class {
-   positionX: number;
-   positionY: number;
    speedX: number;
    speedY: number;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -20,10 +18,8 @@ export class Killer extends Phaser.Class {
  
    body: any;
  
-   constructor(scene: Scene, x: number, y: number, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean, terrorRadius: number, terrorRadiusIndicatorInstance: Phaser.GameObjects.Graphics) {
+   constructor(scene: Scene, phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody, controlledByIa: boolean, terrorRadius: number, terrorRadiusIndicatorInstance: Phaser.GameObjects.Graphics) {
      super({});
-     this.positionX = x;
-     this.positionY = y;
      this.speedX = 0;
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
@@ -40,7 +36,7 @@ export class Killer extends Phaser.Class {
      let objectiveCoordinates: Coordinates | null = null;
      for (const survivor of survivors) {
        const distance = distanceBetween2Points(
-         this.positionX, this.positionY,
+         this.phaserInstance.x, this.phaserInstance.y,
          survivor.phaserInstance.x, survivor.phaserInstance.y,
        );
  
