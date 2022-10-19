@@ -65,7 +65,7 @@ export default class Demo extends Phaser.Scene {
       PLAYABLE_MAP.dimensions.y,
     );
     this.add.graphics()
-      .lineStyle(5, 0x00ffff, 0.5)
+      .lineStyle(1, 0xffffff)
       .strokeRectShape(map);
 
     const spawnableMap = new Phaser.Geom.Rectangle(
