@@ -117,13 +117,6 @@ export default class Demo extends Phaser.Scene {
 
   // time => miliseconds
   update(time: number, delta: number): void {
-
-    // Update positions.
-    for (const killer of killers) {
-      killer.positionX = killer.phaserInstance.x;
-      killer.positionY = killer.phaserInstance.y;
-    }
-
     for (const survivor of survivors) {
       if (gameStartMilisecond && time > gameStartMilisecond) {
         if (survivor.dummyMovement) {
