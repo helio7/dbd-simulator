@@ -24,17 +24,23 @@ export default class Demo extends Phaser.Scene {
   preload() {
     const { GENERATOR, SURVIVOR, KILLER } = DBD_CONSTANTS;
     const { CROSSHAIR, UI } = SIMULATOR_CONSTANTS;
-    this.load.image(GENERATOR.image.name, GENERATOR.image.path);
+
+    const images = [
+      { key: GENERATOR.image.name, url: GENERATOR.image.path },
+      { key: SURVIVOR.image.name, url: SURVIVOR.image.path },
+      { key: KILLER.image.name, url: KILLER.image.path },
+      { key: CROSSHAIR.image.name, url: CROSSHAIR.image.path },
+      { key: 'transparent', url: 'assets/transparent-51x51.png' },
+      { key: 'injured', url: 'assets/injured-51x51.png' },
+      { key: 'downed', url: 'assets/downed-51x51.png' },
+    ];
+
     for (const color of SURVIVOR.colors) {
-      this.load.image(SURVIVOR.image.name.replace('COLOR', color), SURVIVOR.image.path.replace('COLOR', color));
-      this.load.image(UI.SURVIVOR_PORTRAIT.image.name.replace('COLOR', color), UI.SURVIVOR_PORTRAIT.image.path.replace('COLOR', color));
+      images.push({ key: SURVIVOR.image.name.replace('COLOR', color), url: SURVIVOR.image.path.replace('COLOR', color) });
+      images.push({ key: UI.SURVIVOR_PORTRAIT.image.name.replace('COLOR', color), url: UI.SURVIVOR_PORTRAIT.image.path.replace('COLOR', color) });
     }
-    this.load.image(SURVIVOR.image.name, SURVIVOR.image.path);
-    this.load.image(KILLER.image.name, KILLER.image.path);
-    this.load.image(CROSSHAIR.image.name, CROSSHAIR.image.path);
-    this.load.image('transparent', 'assets/transparent-51x51.png');
-    this.load.image('injured', 'assets/injured-51x51.png');
-    this.load.image('downed', 'assets/downed-51x51.png');
+
+    for (const { key, url } of images) this.load.image(key, url);
   }
 
   create() {
