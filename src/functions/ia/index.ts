@@ -30,8 +30,9 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
 
   const shortestDistanceToAKiller = survivor.findShortestDistanceToAKiller(killers);
   
-  const { IA, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
-  if (shortestDistanceToAKiller! < IA.survivorsTerrorRadiusEscapeThreshold * DBD_CONSTANTS.KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER) {
+  const { IA: { survivorsTerrorRadiusEscapeThreshold }, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
+  const { KILLER: { defaultTerrorRadius } } = DBD_CONSTANTS;
+  if (shortestDistanceToAKiller! < survivorsTerrorRadiusEscapeThreshold * defaultTerrorRadius * PIXELS_PER_DBD_METER) {
     survivor.intention = SurvivorIntention.ESCAPE;
   } else {
     survivor.intention = SurvivorIntention.REPAIR;
