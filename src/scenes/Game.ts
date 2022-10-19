@@ -51,7 +51,7 @@ export default class Demo extends Phaser.Scene {
       CROSSHAIR
     } = SIMULATOR_CONSTANTS;
 
-    const { KILLER, SURVIVOR, GENERATOR, CINEMATIC_BEGINNING_DURATION_IN_MS } = DBD_CONSTANTS;
+    const { KILLER, SURVIVOR, CINEMATIC_BEGINNING_DURATION_IN_MS } = DBD_CONSTANTS;
 
     gameStartMilisecond = this.time.now + CINEMATIC_BEGINNING_DURATION_IN_MS;
 
@@ -66,64 +66,7 @@ export default class Demo extends Phaser.Scene {
       .strokeRectShape(playableMap);
 
     const rectanglesOccupiedSpace: Phaser.Geom.Rectangle[] = [];
-    let myGenerators = this.physics.add.staticGroup();
-    for (let i = 0; i < 7; i++) {
-      let coordinates = calculateGeneratorCoordinates();
-
-      let rectangleInstance = new Phaser.Geom.Rectangle(
-        coordinates.x - GENERATOR.dimensions.x / 2,
-        coordinates.y - GENERATOR.dimensions.y / 2,
-        GENERATOR.dimensions.x,
-        GENERATOR.dimensions.y,
-      );
-
-      let freeSpaceFound = false;
-      while (!freeSpaceFound) {
-        let spaceAlreadyOccupied = false;
-        for (const element of rectanglesOccupiedSpace) {
-          if (
-            Phaser.Geom.Rectangle.Overlaps(
-              rectangleInstance,
-              element,
-            )
-          ) {
-            spaceAlreadyOccupied = true;
-            coordinates = calculateGeneratorCoordinates();
-            rectangleInstance = new Phaser.Geom.Rectangle(
-              coordinates.x - GENERATOR.dimensions.x / 2,
-              coordinates.y - GENERATOR.dimensions.y / 2,
-              GENERATOR.dimensions.x,
-              GENERATOR.dimensions.y,
-            );
-            break;
-          }
-        }
-        if (!spaceAlreadyOccupied) freeSpaceFound = true;
-      }
-
-      rectanglesOccupiedSpace.push(
-        new Phaser.Geom.Rectangle(
-          coordinates.x - GENERATOR.dimensions.x / 2 - DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
-          coordinates.y - GENERATOR.dimensions.y / 2 - DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
-          GENERATOR.dimensions.x + 2 * DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
-          GENERATOR.dimensions.y + 2 * DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
-        ),
-      );
-
-      generators.set(
-        i + 1,
-        new Generator(
-          i + 1,
-          this,
-          coordinates.x, coordinates.y,
-          myGenerators.create(
-            coordinates.x,
-            coordinates.y,
-            'generator',
-          ),
-        ),
-      );
-    }
+    const generatorObjectsStaticPhysicsGroup = addGeneratorsToMap(this, 7, rectanglesOccupiedSpace);
 
     const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
     for (let i = 0; i < 4; i++) {
@@ -220,12 +163,12 @@ export default class Demo extends Phaser.Scene {
     );
 
     for (const survivor of survivors) {
-      this.physics.add.collider(survivor.phaserInstance, myGenerators);
+      this.physics.add.collider(survivor.phaserInstance, generatorObjectsStaticPhysicsGroup);
       this.physics.add.collider(survivor.phaserInstance, killerInstance);
     }
 
     for (let i = 0; i < survivors.length; i++) {
-      this.physics.add.collider(survivors[i].phaserInstance, myGenerators);
+      this.physics.add.collider(survivors[i].phaserInstance, generatorObjectsStaticPhysicsGroup);
       this.physics.add.collider(survivors[i].phaserInstance, killerInstance);
 
       for (let j = i; j < survivors.length; j++) {
@@ -233,7 +176,7 @@ export default class Demo extends Phaser.Scene {
       }
     }
 
-    this.physics.add.collider(killerInstance, myGenerators);
+    this.physics.add.collider(killerInstance, generatorObjectsStaticPhysicsGroup);
 
     crosshair = this.add.sprite(400, 300, 'crosshair');
 
@@ -340,27 +283,96 @@ export default class Demo extends Phaser.Scene {
   }
 }
 
+function addGeneratorsToMap(
+  gameScene: Phaser.Scene,
+  numberOfGenerators: number,
+  rectanglesOccupiedSpace: Phaser.Geom.Rectangle[],
+): Phaser.Physics.Arcade.StaticGroup {
+  const { GENERATOR } = DBD_CONSTANTS;
+
+  let generatorObjectsStaticPhysicsGroup = gameScene.physics.add.staticGroup();
+  for (let i = 0; i < numberOfGenerators; i++) {
+    let coordinates = calculateGeneratorCoordinates();
+
+    let rectangleInstance = new Phaser.Geom.Rectangle(
+      coordinates.x - GENERATOR.dimensions.x / 2,
+      coordinates.y - GENERATOR.dimensions.y / 2,
+      GENERATOR.dimensions.x,
+      GENERATOR.dimensions.y,
+    );
+
+    let freeSpaceFound = false;
+    while (!freeSpaceFound) {
+      let spaceAlreadyOccupied = false;
+      for (const element of rectanglesOccupiedSpace) {
+        if (
+          Phaser.Geom.Rectangle.Overlaps(
+            rectangleInstance,
+            element,
+          )
+        ) {
+          spaceAlreadyOccupied = true;
+          coordinates = calculateGeneratorCoordinates();
+          rectangleInstance = new Phaser.Geom.Rectangle(
+            coordinates.x - GENERATOR.dimensions.x / 2,
+            coordinates.y - GENERATOR.dimensions.y / 2,
+            GENERATOR.dimensions.x,
+            GENERATOR.dimensions.y,
+          );
+          break;
+        }
+      }
+      if (!spaceAlreadyOccupied) freeSpaceFound = true;
+    }
+
+    rectanglesOccupiedSpace.push(
+      new Phaser.Geom.Rectangle(
+        coordinates.x - GENERATOR.dimensions.x / 2 - DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
+        coordinates.y - GENERATOR.dimensions.y / 2 - DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
+        GENERATOR.dimensions.x + 2 * DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
+        GENERATOR.dimensions.y + 2 * DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS,
+      ),
+    );
+
+    generators.set(
+      i + 1,
+      new Generator(
+        i + 1,
+        gameScene,
+        coordinates.x, coordinates.y,
+        generatorObjectsStaticPhysicsGroup.create(
+          coordinates.x,
+          coordinates.y,
+          'generator',
+        ),
+      ),
+    );
+  }
+
+  return generatorObjectsStaticPhysicsGroup;
+}
+
 function calculateGeneratorCoordinates(): Coordinates {
-  const { STATUS_BAR, PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
+  const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
   const { GENERATOR } = DBD_CONSTANTS;
   return {
-    x: STATUS_BAR.dimensions.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(GENERATOR.dimensions.x / 2, 0.8 * PLAYABLE_MAP.dimensions.x - GENERATOR.dimensions.x / 2),
-    y: 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(GENERATOR.dimensions.y / 2, 0.8 * PLAYABLE_MAP.dimensions.y - GENERATOR.dimensions.y / 2),
+    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(GENERATOR.dimensions.x / 2, 0.8 * PLAYABLE_MAP.dimensions.x - GENERATOR.dimensions.x / 2),
+    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(GENERATOR.dimensions.y / 2, 0.8 * PLAYABLE_MAP.dimensions.y - GENERATOR.dimensions.y / 2),
   };
 }
 function calculateSurvivorCoordinates(): Coordinates {
-  const { STATUS_BAR, PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
+  const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
   const { SURVIVOR } = DBD_CONSTANTS;
   return {
-    x: STATUS_BAR.dimensions.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.x - SURVIVOR.radius),
-    y: 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.y - SURVIVOR.radius),
+    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.x - SURVIVOR.radius),
+    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.y - SURVIVOR.radius),
   };
 }
 function calculateKillerCoordinates(): Coordinates {
-  const { STATUS_BAR, PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
+  const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
   const { KILLER } = DBD_CONSTANTS;
   return {
-    x: STATUS_BAR.dimensions.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.x - KILLER.radius),
-    y: 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.y - KILLER.radius),
+    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.x - KILLER.radius),
+    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.y - KILLER.radius),
   };
 }
