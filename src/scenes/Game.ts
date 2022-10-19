@@ -68,16 +68,6 @@ export default class Demo extends Phaser.Scene {
       .lineStyle(1, 0xffffff)
       .strokeRectShape(playableMap);
 
-    const spawnableMap = new Phaser.Geom.Rectangle(
-      STATUS_BAR.dimensions.x + 0.1 * PLAYABLE_MAP.dimensions.x,
-      0.1 * PLAYABLE_MAP.dimensions.y,
-      0.8 * PLAYABLE_MAP.dimensions.x,
-      0.8 * PLAYABLE_MAP.dimensions.y,
-    );
-    /* this.add.graphics()
-          .lineStyle(5, 0x00ffff, 0.5)
-          .strokeRectShape(spawnableMap); */
-
     let myGenerators = this.physics.add.staticGroup();
     for (let i = 0; i < 7; i++) {
       let coordinates = calculateGeneratorCoordinates();
