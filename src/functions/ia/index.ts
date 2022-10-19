@@ -39,28 +39,28 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     survivor.focusNearestRepairPosition(generators.values());
   }
 
-  switch (survivor.intention) {
+  const { intention, phaserInstance: { x: survivorXPosition, y: survivorYPosition } } = survivor;
+
+  switch (intention) {
     case SurvivorIntention.REPAIR:
-      if (repairPosition) moveTowardsOrAwayFrom(survivor, repairPosition.coordinates, true);
-      if (
-        generator &&
-        repairPosition &&
-        distanceBetween2Points(
-          survivor.phaserInstance.x,
-          survivor.phaserInstance.y,
-          repairPosition.coordinates.x,
-          repairPosition.coordinates.y,
-        ) <= DBD_CONSTANTS.SURVIVOR.radius &&
-        !repairPosition.isOccupied
-      ) {
-        survivor.phaserInstance.x = repairPosition.coordinates.x;
-        survivor.phaserInstance.y = repairPosition.coordinates.y;
-        survivor.phaserInstance.setPosition(
-          repairPosition.coordinates.x, repairPosition.coordinates.y,
-        );
-        survivor.speedX = 0;
-        survivor.speedY = 0;
-        survivor.phaserInstance.setVelocity(0, 0);
+      if (repairPosition) {
+        moveTowardsOrAwayFrom(survivor, repairPosition.coordinates, true);
+        if (
+          distanceBetween2Points(
+            survivorXPosition, survivorYPosition,
+            repairPosition.coordinates.x, repairPosition.coordinates.y,
+          ) <= DBD_CONSTANTS.SURVIVOR.radius &&
+          !repairPosition.isOccupied
+        ) {
+          survivor.phaserInstance.x = repairPosition.coordinates.x;
+          survivor.phaserInstance.y = repairPosition.coordinates.y;
+          survivor.phaserInstance.setPosition(
+            repairPosition.coordinates.x, repairPosition.coordinates.y,
+          );
+          survivor.speedX = 0;
+          survivor.speedY = 0;
+          survivor.phaserInstance.setVelocity(0, 0);
+        }
       }
       break;
     case SurvivorIntention.ESCAPE:
