@@ -28,18 +28,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
     }
   }
 
-  let shortestDistanceToAKiller = null;
-  const { phaserInstance: { x: survivorXPosition, y: survivorYPosition } } = survivor;
-  for (const killer of killers) {
-    const { phaserInstance: { x: killerXPosition, y: killerYPosition } } = killer;
-    const distanceBetweenKillerAndSurvivor = distanceBetween2Points(
-      survivorXPosition, survivorYPosition,
-      killerXPosition, killerYPosition,
-    );
-    if (shortestDistanceToAKiller === null || distanceBetweenKillerAndSurvivor < shortestDistanceToAKiller) {
-      shortestDistanceToAKiller = distanceBetweenKillerAndSurvivor;
-    }
-  }
+  const shortestDistanceToAKiller = survivor.findShortestDistanceToAKiller(killers);
   
   const { IA, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
   if (shortestDistanceToAKiller! < IA.survivorsTerrorRadiusEscapeThreshold * DBD_CONSTANTS.KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER) {

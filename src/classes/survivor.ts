@@ -140,6 +140,24 @@ export class Survivor extends Phaser.Class {
     } else moveTowardsOrAwayFrom(this, objectiveCoordinates, true);
    }
 
+   findShortestDistanceToAKiller = (
+     killers: Killer[],
+   ): number | null => {
+    let shortestDistanceToAKiller = null;
+    const { phaserInstance: { x: survivorXPosition, y: survivorYPosition } } = this;
+    for (const killer of killers) {
+      const { phaserInstance: { x: killerXPosition, y: killerYPosition } } = killer;
+      const distanceBetweenKillerAndSurvivor = distanceBetween2Points(
+        survivorXPosition, survivorYPosition,
+        killerXPosition, killerYPosition,
+      );
+      if (shortestDistanceToAKiller === null || distanceBetweenKillerAndSurvivor < shortestDistanceToAKiller) {
+        shortestDistanceToAKiller = distanceBetweenKillerAndSurvivor;
+      }
+    }
+    return shortestDistanceToAKiller;
+   }
+
    runAwayFromNearestKiller = (
      killers: Killer[],
    ) => {
