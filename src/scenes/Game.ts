@@ -68,21 +68,15 @@ export default class Demo extends Phaser.Scene {
     const generatorObjectsStaticPhysicsGroup = addGeneratorsToMap(this, 7, rectanglesOccupiedSpace);
 
     const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
-    addSurvivorsToMap(this, 4, rectanglesOccupiedSpace, circlesOccupiedSpace, playableMap);
+    const survivorInstances = addSurvivorsToMap(this, 4, rectanglesOccupiedSpace, circlesOccupiedSpace, playableMap);
 
     const killerInstance = addKillerToMap(this, playableMap);
 
-    for (const survivor of survivors) {
-      this.physics.add.collider(survivor.phaserInstance, generatorObjectsStaticPhysicsGroup);
-      this.physics.add.collider(survivor.phaserInstance, killerInstance);
-    }
-
-    for (let i = 0; i < survivors.length; i++) {
-      this.physics.add.collider(survivors[i].phaserInstance, generatorObjectsStaticPhysicsGroup);
-      this.physics.add.collider(survivors[i].phaserInstance, killerInstance);
-
-      for (let j = i; j < survivors.length; j++) {
-        this.physics.add.collider(survivors[i].phaserInstance, survivors[j].phaserInstance);
+    for (let i = 0; i < survivorInstances.length; i++) {
+      this.physics.add.collider(survivorInstances[i], generatorObjectsStaticPhysicsGroup);
+      this.physics.add.collider(survivorInstances[i], killerInstance);
+      for (let j = i; j < survivorInstances.length; j++) {
+        this.physics.add.collider(survivorInstances[i], survivorInstances[j]);
       }
     }
 
@@ -272,8 +266,10 @@ function addSurvivorsToMap(
   rectanglesOccupiedSpace: Phaser.Geom.Rectangle[],
   circlesOccupiedSpace: Phaser.Geom.Circle[],
   playableMap: Phaser.Geom.Rectangle,
-) {
+): Phaser.Types.Physics.Arcade.ImageWithDynamicBody[] {
   const { SURVIVOR } = DBD_CONSTANTS;
+
+  const survivorInstances = [];
 
   for (let i = 0; i < numberOfSurvivors; i++) {
     let coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
@@ -345,7 +341,11 @@ function addSurvivorsToMap(
     survivors.push(
       new Survivor(gameScene, coordinates.x, coordinates.y, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
     );
+
+    survivorInstances.push(survivorInstance);
   }
+
+  return survivorInstances;
 }
 
 function addKillerToMap(
