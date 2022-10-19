@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Generator } from '../classes/generator';
 import { Killer } from '../classes/killer';
 import { Survivor } from '../classes/survivor';
-import { Coordinates, DBD_CONSTANTS, SIMULATOR_CONSTANTS, SurvivorIntention } from '../constants/constants';
+import { Coordinates, DBD_CONSTANTS, GameElementType, SIMULATOR_CONSTANTS, SurvivorIntention } from '../constants/constants';
 import { circleAndRectangleOverlap } from '../functions/geometry/circleAndRectangleOverlap';
 import { circlesOverlap } from '../functions/geometry/circlesOverlap';
 import { simulateDummyMovement, simulateKillerBehavior, simulateSurvivorBehavior } from '../functions/ia';
@@ -70,7 +70,7 @@ export default class Demo extends Phaser.Scene {
 
     const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
     for (let i = 0; i < 4; i++) {
-      let coordinates = calculateSurvivorCoordinates();
+      let coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
 
       let freeSpaceFound = false;
       while (!freeSpaceFound) {
@@ -85,7 +85,7 @@ export default class Demo extends Phaser.Scene {
             )
           ) {
             spaceAlreadyOccupied = true;
-            coordinates = calculateSurvivorCoordinates();
+            coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
             break;
           }
         }
@@ -99,7 +99,7 @@ export default class Demo extends Phaser.Scene {
               )
             ) {
               spaceAlreadyOccupied = true;
-              coordinates = calculateSurvivorCoordinates();
+              coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
               break;
             }
           }
@@ -141,7 +141,7 @@ export default class Demo extends Phaser.Scene {
       );
     }
 
-    const initialPosition = calculateKillerCoordinates();
+    const initialPosition = calculateGameElementCoordinates(GameElementType.KILLER);
 
     const killerInstance = this.physics.add.image(
         initialPosition.x,
@@ -292,7 +292,7 @@ function addGeneratorsToMap(
 
   let generatorObjectsStaticPhysicsGroup = gameScene.physics.add.staticGroup();
   for (let i = 0; i < numberOfGenerators; i++) {
-    let coordinates = calculateGeneratorCoordinates();
+    let coordinates = calculateGameElementCoordinates(GameElementType.GENERATOR);
 
     let rectangleInstance = new Phaser.Geom.Rectangle(
       coordinates.x - GENERATOR.dimensions.x / 2,
@@ -312,7 +312,7 @@ function addGeneratorsToMap(
           )
         ) {
           spaceAlreadyOccupied = true;
-          coordinates = calculateGeneratorCoordinates();
+          coordinates = calculateGameElementCoordinates(GameElementType.GENERATOR);
           rectangleInstance = new Phaser.Geom.Rectangle(
             coordinates.x - GENERATOR.dimensions.x / 2,
             coordinates.y - GENERATOR.dimensions.y / 2,
@@ -352,27 +352,43 @@ function addGeneratorsToMap(
   return generatorObjectsStaticPhysicsGroup;
 }
 
-function calculateGeneratorCoordinates(): Coordinates {
+function calculateGameElementCoordinates(gameElementType: GameElementType): Coordinates {
   const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
-  const { GENERATOR } = DBD_CONSTANTS;
-  return {
-    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(GENERATOR.dimensions.x / 2, 0.8 * PLAYABLE_MAP.dimensions.x - GENERATOR.dimensions.x / 2),
-    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(GENERATOR.dimensions.y / 2, 0.8 * PLAYABLE_MAP.dimensions.y - GENERATOR.dimensions.y / 2),
+  const { GENERATOR, SURVIVOR, KILLER } = DBD_CONSTANTS;
+
+  const coordinates = {
+    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x,
+    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y,
   };
-}
-function calculateSurvivorCoordinates(): Coordinates {
-  const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
-  const { SURVIVOR } = DBD_CONSTANTS;
-  return {
-    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.x - SURVIVOR.radius),
-    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(SURVIVOR.radius, 0.8 * PLAYABLE_MAP.dimensions.y - SURVIVOR.radius),
-  };
-}
-function calculateKillerCoordinates(): Coordinates {
-  const { PLAYABLE_MAP } = SIMULATOR_CONSTANTS;
-  const { KILLER } = DBD_CONSTANTS;
-  return {
-    x: PLAYABLE_MAP.position.x + 0.1 * PLAYABLE_MAP.dimensions.x + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.x - KILLER.radius),
-    y: PLAYABLE_MAP.position.y + 0.1 * PLAYABLE_MAP.dimensions.y + randomIntFromInterval(KILLER.radius, 0.8 * PLAYABLE_MAP.dimensions.y - KILLER.radius),
-  };
+
+  let xMin = null;
+  let xMax = 0.8 * PLAYABLE_MAP.dimensions.x;
+  let yMin = null;
+  let yMax = 0.8 * PLAYABLE_MAP.dimensions.y;
+  switch (gameElementType) {
+    case GameElementType.GENERATOR:
+      xMin = GENERATOR.dimensions.x / 2;
+      xMax -= GENERATOR.dimensions.x / 2;
+      yMin = GENERATOR.dimensions.y / 2;
+      yMax -= GENERATOR.dimensions.y / 2;
+      break;
+    case GameElementType.SURVIVOR:
+      xMin = SURVIVOR.radius;
+      xMax -= SURVIVOR.radius;
+      yMin = SURVIVOR.radius;
+      yMax -= SURVIVOR.radius;
+      break;
+    case GameElementType.KILLER:
+      xMin = KILLER.radius;
+      xMax -= KILLER.radius;
+      yMin = KILLER.radius;
+      yMax -= KILLER.radius;
+      break;
+    default:
+      throw new Error(`Invalid game element type: ${gameElementType}`);
+  }
+  coordinates.x += randomIntFromInterval(xMin, xMax);
+  coordinates.y += randomIntFromInterval(yMin, yMax);
+
+  return coordinates;
 }

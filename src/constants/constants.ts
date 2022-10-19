@@ -75,6 +75,12 @@ export const DBD_CONSTANTS = {
   CINEMATIC_BEGINNING_DURATION_IN_MS: 3000,
 };
 
+export enum GameElementType {
+  GENERATOR = 'GENERATOR',
+  SURVIVOR = 'SURVIVOR',
+  KILLER = 'KILLER',
+}
+
 export enum SurvivorHealthState {
   NORMAL = 'NORMAL',
   INJURED = 'INJURED',
