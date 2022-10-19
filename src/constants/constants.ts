@@ -5,6 +5,9 @@ export const SIMULATOR_CONSTANTS = {
     },
   },
   PLAYABLE_MAP: {
+    position: {
+      y: 100,
+    },
     dimensions: {
       x: 600,
       y: 600,

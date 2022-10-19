@@ -61,7 +61,7 @@ export default class Demo extends Phaser.Scene {
 
     const map = new Phaser.Geom.Rectangle(
       STATUS_BAR.dimensions.x,
-      0,
+      PLAYABLE_MAP.position.y,
       PLAYABLE_MAP.dimensions.x,
       PLAYABLE_MAP.dimensions.y,
     );
