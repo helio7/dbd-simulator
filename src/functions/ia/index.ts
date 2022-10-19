@@ -16,12 +16,14 @@ export function simulateKillerBehavior(killer: Killer, survivors: Survivor[]) {
 export function simulateSurvivorBehavior(generators: Map<number, Generator>, survivor: Survivor, time: number, killers: Killer[]) {
   let generator: Generator | null = null;
   let repairPosition: RepairPosition | null = null;
-  if (survivor.repairPositionFocused) {
-    const generatorValue = generators.get(survivor.repairPositionFocused.generatorId);
+  const { repairPositionFocused } = survivor;
+  if (repairPositionFocused) {
+    const { generatorId, repairPositionId } = repairPositionFocused;
+    const generatorValue = generators.get(generatorId);
     generator = generatorValue ? generatorValue : null;
     if (generator) {
       repairPosition = generator.getRepairPositionById(
-        survivor.repairPositionFocused.repairPositionId,
+        repairPositionId,
       );
     }
   }
