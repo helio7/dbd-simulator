@@ -69,98 +69,9 @@ export default class Demo extends Phaser.Scene {
     const generatorObjectsStaticPhysicsGroup = addGeneratorsToMap(this, 7, rectanglesOccupiedSpace);
 
     const circlesOccupiedSpace: Phaser.Geom.Circle[] = [];
-    for (let i = 0; i < 4; i++) {
-      let coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
+    addSurvivorsToMap(this, 4, rectanglesOccupiedSpace, circlesOccupiedSpace, playableMap);
 
-      let freeSpaceFound = false;
-      while (!freeSpaceFound) {
-        let spaceAlreadyOccupied = false;
-
-        for (const rectangle of rectanglesOccupiedSpace) {
-          if (
-            circleAndRectangleOverlap(
-              SURVIVOR.radius, coordinates.x, coordinates.y,
-              rectangle.x, rectangle.y,
-              rectangle.x + rectangle.width, rectangle.y + rectangle.height,
-            )
-          ) {
-            spaceAlreadyOccupied = true;
-            coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
-            break;
-          }
-        }
-
-        if (!spaceAlreadyOccupied) {
-          for (const circle of circlesOccupiedSpace) {
-            if (
-              circlesOverlap(
-                coordinates.x, coordinates.y, SURVIVOR.radius,
-                circle.x, circle.y, circle.radius,
-              )
-            ) {
-              spaceAlreadyOccupied = true;
-              coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
-              break;
-            }
-          }
-        }
-
-        if (!spaceAlreadyOccupied) freeSpaceFound = true;
-      }
-
-      const survivorInstance = this.physics.add.image(
-        coordinates.x,
-        coordinates.y,
-        DBD_CONSTANTS.SURVIVOR.image.name.replace('COLOR', DBD_CONSTANTS.SURVIVOR.colors[i]),
-      );
-
-      circlesOccupiedSpace.push(
-        new Phaser.Geom.Circle(coordinates.x, coordinates.y, SURVIVOR.radius + DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS),
-      );
-
-      survivorInstance.setCircle(SURVIVOR.radius);
-      survivorInstance.setBounce(1);
-      survivorInstance.setCollideWorldBounds(true);
-      survivorInstance.body.setBoundsRectangle(playableMap);
-
-      const { STATUS_BAR, UI: { SURVIVOR_PORTRAIT: { yMargin, height, image } } } = SIMULATOR_CONSTANTS;
-      const portraitCharacterImageInstance = this.physics.add.image(
-        STATUS_BAR.dimensions.x / 2,
-        yMargin + height / 2 + (yMargin + height) * i,
-        image.name.replace('COLOR', SURVIVOR.colors[i])
-      );
-
-      const portraitStatusImageInstance = this.physics.add.image(
-        STATUS_BAR.dimensions.x / 2,
-        yMargin + height / 2 + (yMargin + height) * i,
-        'transparent',
-      );
-
-      survivors.push(
-        new Survivor(this, coordinates.x, coordinates.y, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
-      );
-    }
-
-    const initialPosition = calculateGameElementCoordinates(GameElementType.KILLER);
-
-    const killerInstance = this.physics.add.image(
-        initialPosition.x,
-        initialPosition.y,
-        'purple_ball'
-    );
-    killerInstance.setCircle(KILLER.radius);
-    killerInstance.setBounce(1);
-    killerInstance.setCollideWorldBounds(true);
-    killerInstance.body.setBoundsRectangle(playableMap);
-
-    const terrorRadiusIndicatorInstance = this.add.graphics()
-      .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER);
-
-    terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
-
-    killers.push(
-      new Killer(this, initialPosition.x, initialPosition.y, killerInstance, SIMULATOR_CONSTANTS.ACTIVE_IA.killers, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
-    );
+    const killerInstance = addKillerToMap(this, playableMap);
 
     for (const survivor of survivors) {
       this.physics.add.collider(survivor.phaserInstance, generatorObjectsStaticPhysicsGroup);
@@ -354,6 +265,119 @@ function addGeneratorsToMap(
   }
 
   return generatorObjectsStaticPhysicsGroup;
+}
+
+function addSurvivorsToMap(
+  gameScene: Phaser.Scene,
+  numberOfSurvivors: number,
+  rectanglesOccupiedSpace: Phaser.Geom.Rectangle[],
+  circlesOccupiedSpace: Phaser.Geom.Circle[],
+  playableMap: Phaser.Geom.Rectangle,
+) {
+  const { SURVIVOR } = DBD_CONSTANTS;
+
+  for (let i = 0; i < numberOfSurvivors; i++) {
+    let coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
+
+    let freeSpaceFound = false;
+    while (!freeSpaceFound) {
+      let spaceAlreadyOccupied = false;
+
+      for (const rectangle of rectanglesOccupiedSpace) {
+        if (
+          circleAndRectangleOverlap(
+            SURVIVOR.radius, coordinates.x, coordinates.y,
+            rectangle.x, rectangle.y,
+            rectangle.x + rectangle.width, rectangle.y + rectangle.height,
+          )
+        ) {
+          spaceAlreadyOccupied = true;
+          coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
+          break;
+        }
+      }
+
+      if (!spaceAlreadyOccupied) {
+        for (const circle of circlesOccupiedSpace) {
+          if (
+            circlesOverlap(
+              coordinates.x, coordinates.y, SURVIVOR.radius,
+              circle.x, circle.y, circle.radius,
+            )
+          ) {
+            spaceAlreadyOccupied = true;
+            coordinates = calculateGameElementCoordinates(GameElementType.SURVIVOR);
+            break;
+          }
+        }
+      }
+
+      if (!spaceAlreadyOccupied) freeSpaceFound = true;
+    }
+
+    const survivorInstance = gameScene.physics.add.image(
+      coordinates.x,
+      coordinates.y,
+      DBD_CONSTANTS.SURVIVOR.image.name.replace('COLOR', DBD_CONSTANTS.SURVIVOR.colors[i]),
+    );
+
+    circlesOccupiedSpace.push(
+      new Phaser.Geom.Circle(coordinates.x, coordinates.y, SURVIVOR.radius + DBD_CONSTANTS.MINIMUM_SPAWN_DISTANCE_BETWEEN_ELEMENTS),
+    );
+
+    survivorInstance.setCircle(SURVIVOR.radius);
+    survivorInstance.setBounce(1);
+    survivorInstance.setCollideWorldBounds(true);
+    survivorInstance.body.setBoundsRectangle(playableMap);
+
+    const { STATUS_BAR, UI: { SURVIVOR_PORTRAIT: { yMargin, height, image } } } = SIMULATOR_CONSTANTS;
+    const portraitCharacterImageInstance = gameScene.physics.add.image(
+      STATUS_BAR.dimensions.x / 2,
+      yMargin + height / 2 + (yMargin + height) * i,
+      image.name.replace('COLOR', SURVIVOR.colors[i])
+    );
+
+    const portraitStatusImageInstance = gameScene.physics.add.image(
+      STATUS_BAR.dimensions.x / 2,
+      yMargin + height / 2 + (yMargin + height) * i,
+      'transparent',
+    );
+
+    survivors.push(
+      new Survivor(gameScene, coordinates.x, coordinates.y, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
+    );
+  }
+}
+
+function addKillerToMap(
+  gameScene: Phaser.Scene,
+  playableMap: Phaser.Geom.Rectangle,
+): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
+  const { KILLER } = DBD_CONSTANTS;
+  const { PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
+
+  const initialPosition = calculateGameElementCoordinates(GameElementType.KILLER);
+
+  const killerInstance = gameScene.physics.add.image(
+    initialPosition.x,
+    initialPosition.y,
+    'purple_ball'
+  );
+  killerInstance.setCircle(KILLER.radius);
+  killerInstance.setBounce(1);
+  killerInstance.setCollideWorldBounds(true);
+  killerInstance.body.setBoundsRectangle(playableMap);
+
+  const terrorRadiusIndicatorInstance = gameScene.add.graphics()
+    .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER);
+
+  terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
+
+  killers.push(
+    new Killer(gameScene, initialPosition.x, initialPosition.y, killerInstance, SIMULATOR_CONSTANTS.ACTIVE_IA.killers, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER, terrorRadiusIndicatorInstance),
+  );
+
+  return killerInstance;
 }
 
 function calculateGameElementCoordinates(gameElementType: GameElementType): Coordinates {
