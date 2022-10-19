@@ -102,26 +102,7 @@ export class Survivor extends Phaser.Class {
    focusNearestGenerator = (
      generators: Generator[] | IterableIterator<Generator>
    ) => {
-     let shortestDistance = null;
-     let repairPositionId = null;
-     let generatorId = null;
-     for (const generator of generators) {
-       for (const { id, generatorId: genId, isOccupied, coordinates } of generator.repairPositions.values()) {
-         if (!isOccupied) {
-          const { x, y } = this.phaserInstance;
-          const distance = distanceBetween2Points(
-            x, y,
-            coordinates.x, coordinates.y,
-          );
-          if (shortestDistance === null || distance < shortestDistance) {
-           shortestDistance = distance;
-           repairPositionId = id;
-           generatorId = genId;
-          }
-         }
-       }
-     }
-
+     const { repairPositionId, generatorId } = this.findShortestDistanceToARepairPosition(generators);
      if (repairPositionId && generatorId) {
       this.repairPositionFocused = {
         repairPositionId,
@@ -138,6 +119,37 @@ export class Survivor extends Phaser.Class {
       this.speedY = 0;
       this.phaserInstance.setVelocity(0, 0);
     } else moveTowardsOrAwayFrom(this, objectiveCoordinates, true);
+   }
+
+   findShortestDistanceToARepairPosition = (
+    generators: Generator[] | IterableIterator<Generator>,
+   ): {
+    repairPositionId: number | null,
+    generatorId: number | null,
+   } => {
+     let shortestDistanceToARepairPosition = null;
+     let repairPositionId = null;
+     let generatorId = null;
+     for (const generator of generators) {
+       for (const { id, generatorId: genId, isOccupied, coordinates } of generator.repairPositions.values()) {
+         if (!isOccupied) {
+          const { x, y } = this.phaserInstance;
+          const distance = distanceBetween2Points(
+            x, y,
+            coordinates.x, coordinates.y,
+          );
+          if (shortestDistanceToARepairPosition === null || distance < shortestDistanceToARepairPosition) {
+            shortestDistanceToARepairPosition = distance;
+           repairPositionId = id;
+           generatorId = genId;
+          }
+         }
+       }
+     }
+     return {
+       repairPositionId,
+       generatorId,
+     };
    }
 
    findShortestDistanceToAKiller = (
