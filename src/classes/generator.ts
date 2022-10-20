@@ -10,8 +10,6 @@ export interface RepairPosition {
 
 export class Generator extends Phaser.Class {
    id: number;
-   positionX: number;
-   positionY: number;
    repairPositions: Map<number, RepairPosition>;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
    body: any;
@@ -19,18 +17,16 @@ export class Generator extends Phaser.Class {
    constructor(
      id: number,
      scene: Scene,
-     x: number,
-     y: number,
      phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
    ) {
      super({});
      this.id = id;
-     this.positionX = x;
-     this.positionY = y;
 
      const { GENERATOR, SURVIVOR } = DBD_CONSTANTS;
 
      this.repairPositions = new Map();
+
+     const { x, y } = phaserInstance;
 
      this.repairPositions.set(
        1,

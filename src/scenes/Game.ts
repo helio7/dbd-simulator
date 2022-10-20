@@ -236,7 +236,6 @@ function addGeneratorsToMap(
       new Generator(
         i + 1,
         gameScene,
-        coordinates.x, coordinates.y,
         generatorObjectsStaticPhysicsGroup.create(
           coordinates.x,
           coordinates.y,
