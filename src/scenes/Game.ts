@@ -177,6 +177,8 @@ export default class Demo extends Phaser.Scene {
         killer.terrorRadiusIndicatorInstance.setPosition(killer.phaserInstance.x, killer.phaserInstance.y);
       }
     }
+
+    addProgressToGenerators(generators, delta);
   }
 }
 
@@ -327,7 +329,7 @@ function addSurvivorsToMap(
     );
 
     survivors.push(
-      new Survivor(gameScene, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
+      new Survivor(i + 1, gameScene, survivorInstance, true, false, portraitCharacterImageInstance, portraitStatusImageInstance),
     );
 
     survivorInstances.push(survivorInstance);
@@ -406,4 +408,32 @@ function calculateGameElementCoordinates(gameElementType: GameElementType): Coor
   coordinates.y += randomIntFromInterval(yMin, yMax);
 
   return coordinates;
+}
+
+function addProgressToGenerators(
+  generators: Map<number, Generator>,
+  delta: number,
+) {
+  for (const generator of generators.values()) {
+    let survivorsRepairing = 0;
+    for (const repairPosition of generator.repairPositions.values()) {
+      if (repairPosition.survivorIdWorking) survivorsRepairing += 1;
+    }
+    if (survivorsRepairing) {
+      let repairingSpeedMultiplier = 1;
+      switch (survivorsRepairing) {
+        case 2:
+          repairingSpeedMultiplier = 1.7;
+          break;
+        case 3:
+          repairingSpeedMultiplier = 2.1;
+          break;
+        case 4:
+          repairingSpeedMultiplier = 2.2;
+        default:
+          break;
+      }
+      generator.repairProgress += repairingSpeedMultiplier * 100 * delta / DBD_CONSTANTS.GENERATOR.repairTimeInMiliseconds;
+    }
+  }
 }

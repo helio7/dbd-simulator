@@ -52,6 +52,7 @@ export const DBD_CONSTANTS = {
       name: 'generator',
       path: 'assets/generator_25x20.png',
     },
+    repairTimeInMiliseconds: 90 * 1000,
   },
   SURVIVOR: {
     radius: 8.5,

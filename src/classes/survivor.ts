@@ -6,6 +6,7 @@ import { Generator } from "./generator";
 import { Killer } from "./killer";
 
 export class Survivor extends Phaser.Class {
+   id: number;
    speedX: number;
    speedY: number;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
@@ -29,6 +30,7 @@ export class Survivor extends Phaser.Class {
    isSurvivor: boolean = true;
  
    constructor(
+     id: number,
      scene: Scene,
      phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
      controlledByIa: boolean,
@@ -37,6 +39,7 @@ export class Survivor extends Phaser.Class {
      portraitStatusImageInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody,
     ) {
      super({});
+     this.id = id;
      this.speedX = 0;
      this.speedY = 0;
      this.phaserInstance = phaserInstance;
@@ -121,8 +124,8 @@ export class Survivor extends Phaser.Class {
      let repairPositionId = null;
      let generatorId = null;
      for (const generator of generators) {
-       for (const { id, generatorId: genId, isOccupied, coordinates } of generator.repairPositions.values()) {
-         if (!isOccupied) {
+       for (const { id, generatorId: genId, survivorIdWorking, coordinates } of generator.repairPositions.values()) {
+         if (!survivorIdWorking || survivorIdWorking === this.id) {
           const { x, y } = this.phaserInstance;
           const distance = distanceBetween2Points(
             x, y,

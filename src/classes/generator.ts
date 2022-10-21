@@ -5,13 +5,14 @@ export interface RepairPosition {
   id: number;
   generatorId: number;
   coordinates: Coordinates;
-  isOccupied: boolean;
+  survivorIdWorking: number | null;
 }
 
 export class Generator extends Phaser.Class {
    id: number;
    repairPositions: Map<number, RepairPosition>;
    phaserInstance: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+   repairProgress: number;
    body: any;
  
    constructor(
@@ -59,12 +60,13 @@ export class Generator extends Phaser.Class {
               x: repairPositionXCoordinate,
               y: repairPositionYCoordinate,
             },
-            isOccupied: false,
+            survivorIdWorking: null,
           }
         );
      }
 
      this.phaserInstance = phaserInstance;
+     this.repairProgress = 0;
      this.body = scene.add.group();
    }
 

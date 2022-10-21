@@ -50,7 +50,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
             survivorXPosition, survivorYPosition,
             repairPosition.coordinates.x, repairPosition.coordinates.y,
           ) <= DBD_CONSTANTS.SURVIVOR.radius &&
-          !repairPosition.isOccupied
+          !repairPosition.survivorIdWorking || repairPosition.survivorIdWorking === survivor.id
         ) {
           survivor.phaserInstance.x = repairPosition.coordinates.x;
           survivor.phaserInstance.y = repairPosition.coordinates.y;
@@ -60,6 +60,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
           survivor.speedX = 0;
           survivor.speedY = 0;
           survivor.phaserInstance.setVelocity(0, 0);
+          repairPosition.survivorIdWorking = survivor.id;
         }
       }
       break;
