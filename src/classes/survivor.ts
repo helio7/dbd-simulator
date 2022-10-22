@@ -101,6 +101,10 @@ export class Survivor extends Phaser.Class {
      ) return true;
      else return false;
    };
+
+   stopWorkingOnCurrentGenerator = () => {
+     this.repairPositionFocused = null;
+   }
  
    focusNearestRepairPosition = (
      generators: Generator[] | IterableIterator<Generator>
@@ -124,19 +128,21 @@ export class Survivor extends Phaser.Class {
      let repairPositionId = null;
      let generatorId = null;
      for (const generator of generators) {
-       for (const { id, generatorId: genId, survivorIdWorking, coordinates } of generator.repairPositions.values()) {
-         if (!survivorIdWorking || survivorIdWorking === this.id) {
-          const { x, y } = this.phaserInstance;
-          const distance = distanceBetween2Points(
-            x, y,
-            coordinates.x, coordinates.y,
-          );
-          if (shortestDistanceToARepairPosition === null || distance < shortestDistanceToARepairPosition) {
-            shortestDistanceToARepairPosition = distance;
-           repairPositionId = id;
-           generatorId = genId;
+       if (generator.repairProgress < 100) {
+        for (const { id, generatorId: genId, survivorIdWorking, coordinates } of generator.repairPositions.values()) {
+          if (!survivorIdWorking || survivorIdWorking === this.id) {
+           const { x, y } = this.phaserInstance;
+           const distance = distanceBetween2Points(
+             x, y,
+             coordinates.x, coordinates.y,
+           );
+           if (shortestDistanceToARepairPosition === null || distance < shortestDistanceToARepairPosition) {
+             shortestDistanceToARepairPosition = distance;
+            repairPositionId = id;
+            generatorId = genId;
+           }
           }
-         }
+        }
        }
      }
      return {

@@ -1,3 +1,5 @@
+import Gradient from "javascript-color-gradient";
+
 export const SIMULATOR_CONSTANTS = {
   STATUS_BAR: {
     dimensions: {
@@ -53,6 +55,10 @@ export const DBD_CONSTANTS = {
       path: 'assets/generator_25x20.png',
     },
     repairTimeInMiliseconds: 90 * 1000,
+    progressColorGradient: new Gradient()
+      .setColorGradient("#FFFFFF", "FF0000")
+      .setMidpoint(100)
+      .getColors(),
   },
   SURVIVOR: {
     radius: 8.5,

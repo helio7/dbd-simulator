@@ -414,6 +414,7 @@ function addProgressToGenerators(
   generators: Map<number, Generator>,
   delta: number,
 ) {
+  const { GENERATOR } = DBD_CONSTANTS;
   for (const generator of generators.values()) {
     let survivorsRepairing = 0;
     for (const repairPosition of generator.repairPositions.values()) {
@@ -433,7 +434,27 @@ function addProgressToGenerators(
         default:
           break;
       }
-      generator.repairProgress += repairingSpeedMultiplier * 100 * delta / DBD_CONSTANTS.GENERATOR.repairTimeInMiliseconds;
+      generator.repairProgress += repairingSpeedMultiplier * 100 * delta / GENERATOR.repairTimeInMiliseconds;
+      if (generator.repairProgress >= 100) {
+        generator.phaserInstance.setTint(0x949494);
+        for (const repairPosition of generator.repairPositions.values()) {
+          if (repairPosition.survivorIdWorking) {
+            for (const survivor of survivors) {
+              if (survivor.id === repairPosition.survivorIdWorking) {
+                survivor.stopWorkingOnCurrentGenerator();
+                break;
+              }
+            }
+            repairPosition.survivorIdWorking = null;
+          }
+        }
+      } else {
+        generator.phaserInstance.setTint(
+          Number(
+            GENERATOR.progressColorGradient[Math.floor(generator.repairProgress)].replace('#', '0x'),
+          ),
+        );
+      }
     }
   }
 }
