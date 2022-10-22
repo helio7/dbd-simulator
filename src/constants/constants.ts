@@ -42,6 +42,7 @@ export const SIMULATOR_CONSTANTS = {
       yMargin: 25
     },
   },
+  SHOW_KILLER_TERROR_RADIUS: true,
 };
 
 export const DBD_CONSTANTS = {

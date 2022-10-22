@@ -343,7 +343,7 @@ function addKillerToMap(
   playableMap: Phaser.Geom.Rectangle,
 ): Phaser.Types.Physics.Arcade.ImageWithDynamicBody {
   const { KILLER } = DBD_CONSTANTS;
-  const { PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
+  const { PIXELS_PER_DBD_METER, SHOW_KILLER_TERROR_RADIUS } = SIMULATOR_CONSTANTS;
 
   const initialPosition = calculateGameElementCoordinates(GameElementType.KILLER);
 
@@ -358,7 +358,8 @@ function addKillerToMap(
   killerInstance.body.setBoundsRectangle(playableMap);
 
   const terrorRadiusIndicatorInstance = gameScene.add.graphics()
-    .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER);
+    .strokeCircle(0, 0, KILLER.defaultTerrorRadius * PIXELS_PER_DBD_METER)
+    .setVisible(SHOW_KILLER_TERROR_RADIUS ? true : false);
 
   terrorRadiusIndicatorInstance.setPosition(initialPosition.x, initialPosition.y);
 
