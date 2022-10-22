@@ -37,12 +37,15 @@ export class Generator extends Phaser.Class {
           case 1:
             repairPositionXCoordinate = x;
             repairPositionYCoordinate = y - 0.5 * GENERATOR.dimensions.y - SURVIVOR.radius;
+            break;
           case 2:
-            repairPositionXCoordinate = x + 0.5 * GENERATOR.dimensions.x - SURVIVOR.radius;
+            repairPositionXCoordinate = x + 0.5 * GENERATOR.dimensions.x + SURVIVOR.radius;
             repairPositionYCoordinate = y;
+            break;
           case 3:
             repairPositionXCoordinate = x;
-            repairPositionYCoordinate = y + 0.5 * GENERATOR.dimensions.y - SURVIVOR.radius;
+            repairPositionYCoordinate = y + 0.5 * GENERATOR.dimensions.y + SURVIVOR.radius;
+            break;
           case 4:
             repairPositionXCoordinate = x - 0.5 * GENERATOR.dimensions.x - SURVIVOR.radius;
             repairPositionYCoordinate = y;
