@@ -102,6 +102,10 @@ export enum SurvivorIntention {
   ESCAPE = 'ESCAPE',
 };
 
+export enum SurvivorAction {
+  REPAIRING = 'REPAIRING',
+}
+
 export enum KillerIntention {
   IDLE = 'IDLE',
   CHASE = 'CHASE',

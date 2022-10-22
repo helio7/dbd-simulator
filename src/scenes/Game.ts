@@ -441,7 +441,7 @@ function addProgressToGenerators(
           if (repairPosition.survivorIdWorking) {
             for (const survivor of survivors) {
               if (survivor.id === repairPosition.survivorIdWorking) {
-                survivor.stopWorkingOnCurrentGenerator();
+                survivor.stopWorkingOnCurrentGenerator(generators);
                 break;
               }
             }

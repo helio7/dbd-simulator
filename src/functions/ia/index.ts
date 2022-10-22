@@ -1,7 +1,7 @@
 import { Generator, RepairPosition } from "../../classes/generator";
 import { Killer } from "../../classes/killer";
 import { Survivor } from "../../classes/survivor";
-import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorIntention } from "../../constants/constants";
+import { Coordinates, DBD_CONSTANTS, KillerIntention, SIMULATOR_CONSTANTS, SurvivorAction, SurvivorIntention } from "../../constants/constants";
 import { distanceBetween2Points } from "../geometry/distanceBetween2Points";
 import { getUnitVectorFromPoint1To2 } from "../geometry/getUnitVectorFromPoint1To2";
 
@@ -33,6 +33,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
   const { IA: { survivorsTerrorRadiusEscapeThreshold }, PIXELS_PER_DBD_METER } = SIMULATOR_CONSTANTS;
   const { KILLER: { defaultTerrorRadius } } = DBD_CONSTANTS;
   if (shortestDistanceToAKiller! < survivorsTerrorRadiusEscapeThreshold * defaultTerrorRadius * PIXELS_PER_DBD_METER) {
+    if (survivor.currentAction === SurvivorAction.REPAIRING) survivor.stopWorkingOnCurrentGenerator(generators);
     survivor.intention = SurvivorIntention.ESCAPE;
   } else {
     survivor.intention = SurvivorIntention.REPAIR;
@@ -61,6 +62,7 @@ export function simulateSurvivorBehavior(generators: Map<number, Generator>, sur
           survivor.speedY = 0;
           survivor.phaserInstance.setVelocity(0, 0);
           repairPosition.survivorIdWorking = survivor.id;
+          survivor.currentAction = SurvivorAction.REPAIRING;
         }
       }
       break;

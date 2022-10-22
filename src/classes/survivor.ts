@@ -1,5 +1,5 @@
 import { Scene } from "phaser";
-import { Coordinates, DBD_CONSTANTS, SurvivorHealthState, SurvivorIntention } from "../constants/constants";
+import { Coordinates, DBD_CONSTANTS, SurvivorAction, SurvivorHealthState, SurvivorIntention } from "../constants/constants";
 import { distanceBetween2Points } from "../functions/geometry/distanceBetween2Points";
 import { moveTowardsOrAwayFrom } from "../functions/ia";
 import { Generator } from "./generator";
@@ -19,6 +19,7 @@ export class Survivor extends Phaser.Class {
      repairPositionId: number,
      generatorId: number
    } | null;
+   currentAction: SurvivorAction | null;
  
    healthState: SurvivorHealthState;
    isAdvancingTowardsObjective: boolean;
@@ -49,6 +50,7 @@ export class Survivor extends Phaser.Class {
      this.portraitStatusImageInstance = portraitStatusImageInstance;
      this.intention = SurvivorIntention.IDLE;
      this.repairPositionFocused = null;
+     this.currentAction = null;
  
      this.healthState = SurvivorHealthState.NORMAL;
      
@@ -102,8 +104,14 @@ export class Survivor extends Phaser.Class {
      else return false;
    };
 
-   stopWorkingOnCurrentGenerator = () => {
-     this.repairPositionFocused = null;
+   stopWorkingOnCurrentGenerator = (
+    generators: Map<number, Generator>
+   ) => {
+     if (this.repairPositionFocused) {
+      const { repairPositionFocused: { generatorId, repairPositionId } } = this;
+      generators.get(generatorId)!.getRepairPositionById(repairPositionId)!.survivorIdWorking = null;
+      this.repairPositionFocused = null;
+     }
    }
  
    focusNearestRepairPosition = (
